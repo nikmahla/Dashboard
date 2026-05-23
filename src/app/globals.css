@@ -1,26 +1,344 @@
 @import "tailwindcss";
 
+/* ------------------------------
+   GLOBAL RESET
+--------------------------------*/
+html, body, #__next {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: scroll;
+}
+
+/* ------------------------------
+   LIGHT THEME — MIDNIGHT PURPLE
+--------------------------------*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base */
+  --bg-default: #F6F5FA;      /* soft lavender-gray */
+  --bg-muted: #FFFFFF;        /* card */
+  --border-default: #E4E2EC;  /* cool border */
+
+  /* Text */
+  --text-primary: #1A1A1C;
+  --text-secondary: #6A6A75;
+
+  /* Accents */
+  --primary-accent: #8B5CF6;   /* violet 500 */
+  --primary-accent-2: #A78BFA; /* violet 400 */
+  --success: #10B981;
+  --warning: #FBBF24;
+  --danger: #EF4444;
+  --info: #6366F1;
+
+  /* Component Aliases */
+  --background: var(--bg-default);
+  --card-bg: var(--bg-muted);
+  --glass-border: var(--border-default);
+  --glass-shadow: rgba(0,0,0,0.05);
+
+  --foreground: var(--text-primary);
+  --muted: var(--text-secondary);
+
+  /* Semantic */
+  --primary: var(--primary-accent);
+  --primary-2: var(--primary-accent-2);
+  --teal: var(--info);
+  --support-a: var(--warning);
+  --support-b: var(--danger);
+
+  /* Derived */
+  --primary-soft: rgba(139,92,246,0.12);
+  --teal-soft: rgba(99,102,241,0.12);
+  --table-head-bg: rgba(139,92,246,0.06);
+  --table-row-border: rgba(228,226,236,0.8);
+  --table-row-hover: rgba(139,92,246,0.04);
+
+ /* Sidebar */
+  --sidebar-bg: #f3f4f6;
+  --sidebar-text: #111827;         
+  --sidebar-muted: #6b7280;
+  --sidebar-hover: #e5e7eb;
+
+  --sidebar-active-bg: rgba(139, 92, 246, 0.16);
+  --sidebar-active-text: #5b21b6;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ------------------------------
+   DARK THEME — MIDNIGHT PURPLE
+--------------------------------*/
+.dark {
+  /* Base */
+  --bg-default: #0D0B12;      /* deep purple-black */
+  --bg-muted: #16131F;        /* card */
+  --border-default: #2A2635;  /* subtle border */
+
+  /* Text */
+  --text-primary: #F5F4FA;
+  --text-secondary: #A6A3B8;
+
+  /* Accents */
+  --primary-accent: #8B5CF6;
+  --primary-accent-2: #A78BFA;
+  --success: #10B981;
+  --warning: #FBBF24;
+  --danger: #EF4444;
+  --info: #6366F1;
+
+  /* Component Aliases */
+  --background: var(--bg-default);
+  --card-bg: var(--bg-muted);
+  --glass-border: var(--border-default);
+  --glass-shadow: rgba(0,0,0,0.6);
+
+--foreground: var(--text-primary);
+  --muted: var(--text-secondary);
+
+  /* Semantic */
+  --primary: var(--primary-accent);
+  --primary-2: var(--primary-accent-2);
+  --teal: var(--info);
+  --support-a: var(--warning);
+  --support-b: var(--danger);
+
+  /* Derived */
+  --primary-soft: rgba(139,92,246,0.12);
+  --teal-soft: rgba(99,102,241,0.12);
+  --table-head-bg: rgba(255,255,255,0.03);
+  --table-row-border: rgba(255,255,255,0.06);
+  --table-row-hover: rgba(139,92,246,0.05);
+
+ 
+  /* Sidebar */
+  --sidebar-bg: #0f172a;
+  --sidebar-text: #e5e7eb;
+  --sidebar-muted: #94a3b8;
+  --sidebar-hover: #1e293b;
+
+  --sidebar-active-bg: rgba(139, 92, 246, 0.22);
+  --sidebar-active-text: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ------------------------------
+   SIDEBAR — 2025 PREMIUM STYLE
+--------------------------------*/
+aside.glass {
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border-default);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: inset -1px 0 0 rgba(255,255,255,0.04);
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.6rem;
+  font-size: 0.875rem;
+
+    color: color-mix(in srgb, var(--sidebar-text) 78%, transparent); /* inactive */
+
+  transition: background 0.15s ease, color 0.15s ease;
+  min-height: 44px;       /* ✅ better click size */
+  padding: 0.75rem 0.9rem;
+}
+
+
+.sidebar-item:hover {
+  color: var(--sidebar-text); /* hover */
+  background: var(--sidebar-hover);
+}
+
+.sidebar-item-active {
+  background: var(--primary);
+  color: white; /* ✅ icon + label become white */
+}
+.sidebar-item svg {
+  color: currentColor; /* ✅ icons follow the text color */
+}
+
+
+.sidebar-tooltip {
+  background: var(--card-bg);
+  color: var(--foreground);
+  border: 1px solid var(--border-default);
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+}
+
+/* ------------------------------
+   BUTTONS — 2025 GRADIENT STYLE
+--------------------------------*/
+.btn-primary {
+  background-image: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+  color: white;
+  padding: 0.55rem 1rem;
+  border-radius: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  box-shadow:
+    0 4px 14px rgba(139,92,246,0.25),
+    inset 0 0 0 1px rgba(255,255,255,0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow:
+    0 8px 24px rgba(139,92,246,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.25);
+}
+
+.btn-primary:active {
+  transform: translateY(0px);
+  filter: brightness(0.95);
+  box-shadow:
+    0 3px 10px rgba(139,92,246,0.25),
+    inset 0 0 0 1px rgba(255,255,255,0.2);
+}
+
+/* ------------------------------
+   TABLES
+--------------------------------*/
+.table-head {
+  background: var(--table-head-bg);
+  color: var(--foreground);
+  border-bottom: 1px solid var(--table-row-border);
+}
+
+.table-row {
+  border-bottom: 1px solid var(--table-row-border);
+}
+
+.table-row:hover {
+  background: var(--table-row-hover);
+}
+
+/* ------------------------------
+   INPUTS
+--------------------------------*/
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--glass-border);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--foreground);
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input::placeholder {
+  color: var(--muted);
+}
+
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+/* ------------------------------
+   GLASS UTILITIES
+--------------------------------*/
+.glass {
+  background: var(--background);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 20px var(--glass-shadow);
+}
+
+.glass-soft {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
+/* ------------------------------
+   ANIMATIONS
+--------------------------------*/
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
-body {
-  background: var(--background);
+.animate-dropdown {
+  animation: dropdown 0.15s ease-out forwards;
+}
+
+
+
+/* Ensure icons inside theme-toggle are visible in both modes */
+.theme-toggle svg {
+ stroke: var(--foreground) !important;}
+
+.dark .theme-toggle svg {
+  stroke: var(--foreground);
+}
+.text-foreground {
+  color: var(--foreground) !important;
+}
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95) }
+  to { opacity: 1; transform: scale(1) }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-2);
+}
+
+
+.icon-btn {
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
