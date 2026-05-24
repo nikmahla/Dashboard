@@ -267,7 +267,7 @@ useEffect(() => {
           ...(height ? { height } : { height: "60vh" }),
         }}
       >
-        {loading && (
+        {(loading && showSpinner) && (
           <div
             className="
               absolute inset-0

@@ -10,18 +10,19 @@ export function useApiError() {
 
   return useCallback(
     (err: ApiErr, fallback = "Something went wrong") => {
-      // اگر از http helper خودت throw {status,text} می‌کنی:
+      // Support different error shapes from `http()` and fetch
       const status = err?.status;
-      const text = err?.text;
+      const text = err?.text ?? err?.bodyText ?? err?.message ?? null;
 
       let msg = fallback;
 
-      // اگر بدنه JSON بود
+      // If body is JSON with `{ message }`
       try {
-        const j = text ? JSON.parse(text) : null;
+        const j = typeof text === 'string' ? JSON.parse(text) : null;
         if (j?.message) msg = j.message;
       } catch {
-        // ignore
+        // if text is plain string use it
+        if (typeof text === 'string' && text.trim() !== '') msg = text;
       }
 
       if (status === 401) msg = "Unauthorized (please login again)";
