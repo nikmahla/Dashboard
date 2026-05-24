@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { http } from "@/lib/http";
 
 export type Customer = {
@@ -24,7 +24,7 @@ export function useCustomers(p: Params) {
       http<CustomersResponse>(
         `/api/customers?page=${p.page}&pageSize=${p.pageSize}&search=${encodeURIComponent(p.search)}`
       ),
-    placeholderData: keepPreviousData, // ✅ v5
+    keepPreviousData: true,
   });
 }
 
