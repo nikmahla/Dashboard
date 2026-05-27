@@ -1,35 +1,26 @@
-export default function PageLayout({
-  title,
-  children,
-}: {
+import { type ReactNode } from 'react';
+import Panel from '@/components/ui/Panel';
+import { ui, cn } from '@/lib/ui';
+
+type PageLayoutProps = {
   title: string;
-  children: React.ReactNode;
-}) {
+  description?: string;
+  children: ReactNode;
+};
+
+export default function PageLayout({ title, description, children }: PageLayoutProps) {
   return (
-    <div className="space-y-6">
+    <div className={ui.spacing.pageY}>
+      <header>
+        <h1 className={ui.typography.pageTitle}>{title}</h1>
+        {description && (
+          <p className={`mt-1 ${ui.typography.pageSubtitle}`}>{description}</p>
+        )}
+      </header>
 
-      {/* Page Title */}
-      <h1
-        className="
-          text-2xl md:text-3xl font-semibold tracking-tight
-         
-        "
-      >
-        {title}
-      </h1>
-
-      {/* Content Container */}
-      <div
-        className="
-          glass-soft rounded-2xl
-          border border-[color:var(--glass-border)]
-          shadow-[0_4px_20px_rgba(0,0,0,0.08)]
-          p-4 md:p-6
-          transition-all
-        "
-      >
+      <Panel className={cn(ui.spacing.cardPadding, 'transition-shadow duration-200')}>
         {children}
-      </div>
+      </Panel>
     </div>
   );
 }

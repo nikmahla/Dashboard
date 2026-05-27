@@ -1,40 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
 import AuthGuard from '@/components/AuthGuard';
-import Topbar from '@/components/Topbar';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import Sidebar from '@/components/Sidebar';
+import Topbar from '@/components/Topbar';
+import { ui } from '@/lib/ui';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        'use client';
-
-        import { useState } from 'react';
-
-        import AuthGuard from '@/components/AuthGuard';
-        import Topbar from '@/components/Topbar';
-        import Sidebar from '@/components/Sidebar';
-
-        export default function AdminLayout({ children }: { children: React.ReactNode }) {
-          const [open, setOpen] = useState(true);
-
-          return (
-            <AuthGuard>
-              <div className="min-h-screen md:flex">
-                <Sidebar open={open} setOpen={setOpen} />
-                <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
-                  <Topbar onToggleSidebar={() => setOpen((v) => !v)} />
-                  <main className="pt-20 px-6 pb-6">
-                    <div className="w-full max-w-7xl mx-auto">{children}</div>
-                  </main>
-                </div>
-              </div>
-            </AuthGuard>
-          );
-        }
+  return (
+    <AuthGuard>
+      <div className={ui.layout.shell}>
+        <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
+        <div className={ui.layout.content}>
+          <Topbar onToggleSidebar={() => setSidebarOpen((v) => !v)} />
+          <main className="flex-1 px-4 pb-6 pt-20 sm:px-6 md:pb-8">
+            <div className={ui.layout.main}>
+              <Breadcrumbs />
+              {children}
+            </div>
+          </main>
+        </div>
+      </div>
+    </AuthGuard>
+  );
+}

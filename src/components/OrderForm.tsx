@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ui, cn } from '@/lib/ui';
 
 export default function OrderForm({
   initial,
@@ -39,15 +40,11 @@ export default function OrderForm({
         <input
           value={customer}
           onChange={(e) => setCustomer(e.target.value)}
-          className="
-            mt-1 w-full rounded-xl px-3 py-2
-            bg-[color:var(--card-bg)]
-            border border-[color:var(--glass-border)]
-            text-[color:var(--foreground)]
-            shadow-sm
-            focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]
-            transition-all
-          "
+          className={cn(
+            'mt-1 w-full px-3 py-2 bg-[color:var(--card-bg)] border border-[color:var(--glass-border)] text-[color:var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all',
+            ui.radius.md,
+            ui.shadow.sm
+          )}
         />
       </label>
 
@@ -60,15 +57,11 @@ export default function OrderForm({
           type="number"
           value={String(total)}
           onChange={(e) => setTotal(Number(e.target.value))}
-          className="
-            mt-1 w-full rounded-xl px-3 py-2
-            bg-[color:var(--card-bg)]
-            border border-[color:var(--glass-border)]
-            text-[color:var(--foreground)]
-            shadow-sm
-            focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]
-            transition-all
-          "
+          className={cn(
+            'mt-1 w-full px-3 py-2 bg-[color:var(--card-bg)] border border-[color:var(--glass-border)] text-[color:var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all',
+            ui.radius.md,
+            ui.shadow.sm
+          )}
         />
       </label>
 
@@ -80,15 +73,11 @@ export default function OrderForm({
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="
-            mt-1 w-48 rounded-xl px-3 py-2
-            bg-[color:var(--card-bg)]
-            border border-[color:var(--glass-border)]
-            text-[color:var(--foreground)]
-            shadow-sm
-            focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]
-            transition-all
-          "
+          className={cn(
+            'mt-1 w-48 px-3 py-2 bg-[color:var(--card-bg)] border border-[color:var(--glass-border)] text-[color:var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all',
+            ui.radius.md,
+            ui.shadow.sm
+          )}
         >
           <option>Pending</option>
           <option>Completed</option>
@@ -105,15 +94,11 @@ export default function OrderForm({
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="
-            mt-1 w-48 rounded-xl px-3 py-2
-            bg-[color:var(--card-bg)]
-            border border-[color:var(--glass-border)]
-            text-[color:var(--foreground)]
-            shadow-sm
-            focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]
-            transition-all
-          "
+          className={cn(
+            'mt-1 w-48 px-3 py-2 bg-[color:var(--card-bg)] border border-[color:var(--glass-border)] text-[color:var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all',
+            ui.radius.md,
+            ui.shadow.sm
+          )}
         />
       </label>
 
@@ -129,13 +114,11 @@ export default function OrderForm({
               date,
             })
           }
-          className="
-            px-5 py-2 rounded-xl text-sm font-medium
-            bg-[color:var(--primary)] text-white
-            shadow-md
-            hover:opacity-90 active:scale-95
-            transition-all
-          "
+          className={cn(
+            'px-5 py-2 text-sm font-medium bg-[color:var(--primary)] text-white hover:opacity-90 active:scale-95 transition-all',
+            ui.radius.md,
+            ui.shadow.md
+          )}
         >
           Save
         </button>

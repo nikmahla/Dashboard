@@ -1,99 +1,121 @@
-"use client";
+'use client';
 
-import { X } from "lucide-react";
+import { type ReactNode } from 'react';
+import { X } from 'lucide-react';
+import { ui, cn } from '@/lib/ui';
 
-type ModalProps = {
+export type ModalProps = {
   open: boolean;
   title: string;
+  subtitle?: string;
   onClose: () => void;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
+  icon?: ReactNode;
+  children: ReactNode;
+  footer?: ReactNode;
+  size?: 'sm' | 'md' | 'lg';
 };
 
-export default function Modal({ open, title, onClose, icon, children }: ModalProps) {
+const sizeClass = {
+  sm: 'max-w-md',
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
+};
+
+export default function Modal({
+  open,
+  title,
+  subtitle,
+  onClose,
+  icon,
+  children,
+  footer,
+  size = 'md',
+}: ModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
-      {/* Backdrop */}
-      <div
-        className="
-          absolute inset-0
-          bg-black/50
-          backdrop-blur-sm
-        "
+    <div
+      className="fixed inset-0 z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <button
+        type="button"
+        className="absolute inset-0 bg-[color:var(--overlay)] backdrop-blur-sm"
         onClick={onClose}
+        aria-label="Close dialog"
       />
 
-      {/* Center wrapper (better spacing on mobile) */}
-      <div className="relative h-full w-full flex items-start sm:items-center justify-center p-4 sm:p-6">
+      <div className="relative flex h-full w-full items-start justify-center p-4 sm:items-center sm:p-6">
         <div
-          className="
-            relative w-full max-w-lg
-            rounded-2xl overflow-hidden
-            bg-[color:var(--card-bg)]
-            border border-[color:var(--glass-border)]
-            shadow-[0_16px_70px_rgba(0,0,0,0.45)]
-            ring-1 ring-black/5 dark:ring-white/5
-            animate-scaleIn
-          "
+          className={cn(
+            'relative w-full animate-scaleIn overflow-hidden',
+            ui.radius.lg,
+            'border border-[color:var(--glass-border)] bg-[color:var(--card-bg)]',
+            'shadow-[0_16px_70px_rgba(0,0,0,0.25)] ring-1 ring-black/5 dark:ring-white/5',
+            sizeClass[size]
+          )}
+          onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
-          <div
-            className="
-              px-6 py-4
-              flex items-start justify-between gap-4
-              border-b
-              bg-[color:var(--card-bg)]
-            "
-            style={{ borderColor: "var(--glass-border)" }}
-          >
-            <div className="flex items-start gap-3">
-              {icon && (
-                <span
-                  className="
-                    mt-0.5
-                    h-9 w-9 rounded-xl
-                    flex items-center justify-center
-                    bg-[color:var(--primary-soft)]
-                    text-[color:var(--primary)]
-                    shadow-sm
-                  "
-                >
-                  {icon}
-                </span>
-              )}
-
-              <div>
-                <h3 className="text-base font-semibold tracking-tight text-[color:var(--foreground)]">
-                  {title}
-                </h3>
-
-                {/* subtle line (looks more product UI) */}
-                <p className="mt-1 text-xs text-[color:var(--muted)]">
-                  Manage details carefully. Changes apply immediately.
-                </p>
+          <div className="border-b border-[color:var(--glass-border)] px-5 py-4 sm:px-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex min-w-0 items-start gap-3">
+                {icon && (
+                  <span
+                    className={cn(
+                      'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center',
+                      ui.radius.md,
+                      'bg-[var(--primary-soft)] text-[color:var(--primary)]'
+                    )}
+                    aria-hidden
+                  >
+                    {icon}
+                  </span>
+                )}
+                <div className="min-w-0">
+                  <h2
+                    id="modal-title"
+                    className={ui.typography.sectionTitle}
+                  >
+                    {title}
+                  </h2>
+                  {subtitle && (
+                    <p className={`mt-1 ${ui.typography.caption}`}>{subtitle}</p>
+                  )}
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className={cn(
+                  'shrink-0 p-2 text-[color:var(--muted)] transition-colors',
+                  ui.radius.md,
+                  'hover:bg-[var(--primary-soft)] hover:text-[color:var(--foreground)]',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]'
+                )}
+                aria-label="Close"
+              >
+                <X size={18} aria-hidden />
+              </button>
             </div>
 
-            <button
-              onClick={onClose}
-              className="
-                p-2 rounded-xl
-                text-[color:var(--muted)]
-                hover:bg-[color:var(--primary-soft)]
-                transition active:scale-95
-              "
-              aria-label="Close"
-            >
-              <X size={18} />
-            </button>
+            <div
+              className="mt-4 h-px w-full bg-gradient-to-r from-[color:var(--primary)]/40 via-[color:var(--glass-border)] to-transparent"
+              aria-hidden
+            />
           </div>
 
-          {/* Body (better spacing + safe scroll on small screens) */}
-          <div className="px-6 py-5 text-sm text-[color:var(--foreground)] max-h-[70vh] overflow-y-auto">
+          <div className="max-h-[min(70vh,520px)] overflow-y-auto px-5 py-5 text-sm text-[color:var(--foreground)] sm:px-6">
             {children}
           </div>
+
+          {footer && (
+            <div className="border-t border-[color:var(--glass-border)] px-5 py-4 sm:px-6">
+              {footer}
+            </div>
+          )}
         </div>
       </div>
     </div>

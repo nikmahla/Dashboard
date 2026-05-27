@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import { Eye, Trash2 } from "lucide-react";
+import { ui } from '@/lib/ui';
 
 const MAX = 80;
 const START_THRESHOLD = 12;
@@ -122,12 +123,12 @@ export default function SwipeCard({
 
       {/* CARD */}
       <div
-        className="
-          glass-soft rounded-xl shadow-sm
+        className={`
+          glass-soft ${ui.radius.md} ${ui.shadow.sm}
           transition-transform duration-200
           active:scale-[0.98]
           touch-pan-y
-        "
+        `}
         style={{ transform: `translateX(${offset}px)` }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}

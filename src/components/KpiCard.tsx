@@ -1,96 +1,76 @@
 'use client';
 
-import React from 'react';
-import KpiChart from './KpiChart';
+import { useMemo, type ReactNode } from 'react';
+import KpiChart from '@/components/KpiChart';
+import Panel from '@/components/ui/Panel';
+import { kpiColors, ui, cn, type KpiColor } from '@/lib/ui';
 
-type Props = {
+type KpiCardProps = {
   label: string;
   value: number;
-  icon: React.ReactNode;
+  icon: ReactNode;
   trend?: number[];
-  color?: 'purple' | 'blue' | 'green' | 'orange';
+  color?: KpiColor;
 };
 
-const colors = {
-  purple: {
-    iconBg: 'bg-[var(--primary-soft)] text-[color:var(--primary)]',
-    value: 'text-[color:var(--primary)]',
-  },
-  blue: {
-    iconBg: 'bg-[var(--primary-soft)] text-[color:var(--support-a)]',
-    value: 'text-[color:var(--support-a)]',
-  },
-  green: {
-    iconBg: 'bg-[var(--teal-soft)] text-[color:var(--teal)]',
-    value: 'text-[color:var(--teal)]',
-  },
-  orange: {
-    iconBg: 'bg-[var(--primary-soft)] text-[color:var(--support-b)]',
-    value: 'text-[color:var(--support-b)]',
-  },
-};
+function buildFallbackTrend(base: number, points = 8): number[] {
+  const out: number[] = [];
+  const scale = Math.max(1, Math.round(Math.abs(base) / 50));
+
+  for (let i = 0; i < points; i++) {
+    const jitter = (Math.sin(i * 1.3) + 0.3) * scale;
+    out.push(Math.max(0, Math.round(base - scale * 3 + jitter)));
+  }
+
+  return out;
+}
 
 export default function KpiCard({
   label,
   value,
   icon,
+  trend,
   color = 'purple',
-}: Props) {
-  const c = colors[color];
-
-  // generate a small realistic trend if none is provided
-  const generateTrend = (base: number, points = 8) => {
-    const out: number[] = [];
-    for (let i = 0; i < points; i++) {
-      // small random walk around base, scaled for magnitude
-      const scale = Math.max(1, Math.round(Math.abs(base) / 50));
-      const jitter = (Math.sin(i * 1.3) + Math.random() * 0.6) * scale;
-      const val = Math.max(0, Math.round(base - scale * 3 + jitter));
-      out.push(val);
-    }
-    return out;
-  };
-
-  const trend = ((): number[] => {
-    if (Array.isArray((arguments as any)[0]?.trend)) return (arguments as any)[0].trend;
-    return generateTrend(value);
-  })();
+}: KpiCardProps) {
+  const palette = kpiColors[color];
+  const chartData = useMemo(
+    () => (trend?.length ? trend : buildFallbackTrend(value)),
+    [trend, value]
+  );
 
   return (
-    <div
-      className="
-        rounded-2xl glass-soft
-        p-4 transition
-        hover:-translate-y-1 hover:shadow-lg
-      "
+    <Panel
+      hover
+      className={cn(
+        ui.spacing.cardPadding,
+        'hover:-translate-y-0.5 transition-transform duration-200'
+      )}
     >
-      {/* Top */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-[color:var(--muted)]">
-            {label}
-          </p>
-          <p className={`text-xl font-semibold ${c.value}`}>
-            {value.toLocaleString()}
-          </p>
+      <article aria-label={`${label}: ${value.toLocaleString()}`}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className={ui.typography.label}>{label}</p>
+            <p className={cn(ui.typography.value, palette.value)}>
+              {value.toLocaleString()}
+            </p>
+          </div>
+
+          <div
+            className={cn(
+              'flex h-10 w-10 shrink-0 items-center justify-center',
+              ui.radius.md,
+              palette.iconBg
+            )}
+            aria-hidden
+          >
+            {icon}
+          </div>
         </div>
 
-        <div
-          className={`
-            h-10 w-10 rounded-xl
-            flex items-center justify-center
-            ${c.iconBg}
-          `}
-          aria-hidden
-        >
-          {icon}
+        <div className="mt-3 h-12" aria-hidden>
+          <KpiChart data={chartData} color={color} />
         </div>
-      </div>
-
-      {/* Chart */}
-      <div className="h-12 mt-3">
-        <KpiChart data={trend} color={color} />
-      </div>
-    </div>
+      </article>
+    </Panel>
   );
 }

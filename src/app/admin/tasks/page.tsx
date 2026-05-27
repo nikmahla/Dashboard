@@ -254,8 +254,8 @@ export default function TasksPage() {
                   grid grid-cols-1 sm:grid-cols-[1fr_auto]
                   gap-4 sm:gap-2
                   px-4 py-4 transition-colors duration-200
-                  hover:bg-white/5 
-                  ${isEditing ? "bg-white/5 animate-in fade-in duration-150" : ""}
+                  hover:bg-[color:var(--surface-hover)]
+                  ${isEditing ? "bg-[color:var(--surface-hover)] animate-in fade-in duration-150" : ""}
                 `}
               >
                 {/* Left */}
@@ -291,7 +291,7 @@ export default function TasksPage() {
                             bg-transparent
                             text-[color:var(--foreground)]
                             outline-none focus:outline-none focus:ring-0
-                            focus:bg-slate-100 dark:focus:bg-white/10
+                            focus:bg-[color:var(--surface-hover)]
                             px-0 py-0
                           "
                         />
@@ -318,10 +318,10 @@ export default function TasksPage() {
                         className={`
                           text-xs px-2 py-0.5 rounded-full w-fit
                           ${task.priority === "high"
-                            ? "bg-red-500/20 text-red-400"
+                            ? "bg-[color:var(--danger-soft)] text-[color:var(--danger)]"
                             : task.priority === "medium"
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : "bg-green-500/20 text-green-400"}
+                            ? "bg-[color:var(--warning-soft)] text-[color:var(--warning)]"
+                            : "bg-[color:var(--success-soft)] text-[color:var(--teal)]"}
                         `}
                       >
                         {task.priority.toUpperCase()}
@@ -362,7 +362,7 @@ export default function TasksPage() {
                           disabled={isMutating}
                           className="
                             h-9 w-9 inline-flex items-center justify-center rounded-lg
-                            hover:bg-black/5 dark:hover:bg-white/10 transition
+                            hover:bg-[color:var(--surface-hover)] transition
                             text-[color:var(--teal)]
                             disabled:opacity-60
                           "
@@ -378,7 +378,7 @@ export default function TasksPage() {
                           onClick={cancelEdit}
                           className="
                             h-9 w-9 inline-flex items-center justify-center rounded-lg
-                            hover:bg-black/5 dark:hover:bg-white/10 transition
+                            hover:bg-[color:var(--surface-hover)] transition
                             text-[color:var(--muted)]
                           "
                           aria-label="Cancel"
@@ -395,7 +395,7 @@ export default function TasksPage() {
                         disabled={isMutating}
                         className="
                           h-9 w-9 inline-flex items-center justify-center rounded-lg
-                          hover:bg-black/5 dark:hover:bg-white/10 transition
+                          hover:bg-[color:var(--surface-hover)] transition
                           text-[color:var(--muted)] hover:text-[color:var(--primary)]
                           disabled:opacity-60
                         "
@@ -413,7 +413,7 @@ export default function TasksPage() {
                       disabled={isMutating}
                       className="
                         h-9 w-9 inline-flex items-center justify-center rounded-lg
-                        hover:bg-black/5 dark:hover:bg-white/10 transition
+                        hover:bg-[color:var(--surface-hover)] transition
                         text-[color:var(--muted)] hover:text-[color:var(--danger)]
                         disabled:opacity-60
                       "
@@ -434,7 +434,7 @@ export default function TasksPage() {
       {taskToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-[color:var(--overlay)] backdrop-blur-sm"
             onClick={() => setTaskToDelete(null)}
           />
 
@@ -469,7 +469,7 @@ export default function TasksPage() {
                   flex-1 px-4 py-2 text-sm font-medium
                   text-[color:var(--foreground)] bg-transparent rounded-xl
                   border border-[color:var(--glass-border)]
-                  hover:bg-black/5 dark:hover:bg-white/10 transition
+                  hover:bg-[color:var(--surface-hover)] transition
                 "
               >
                 Cancel

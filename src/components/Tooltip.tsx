@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useId, useState } from "react";
+import { ui } from '@/lib/ui';
 
 type TooltipProps = {
   label: string;
@@ -11,7 +12,6 @@ type TooltipProps = {
 export default function Tooltip({ label, children, side = "top" }: TooltipProps) {
   const id = useId();
   const [canHover, setCanHover] = useState(false);
-
   useEffect(() => {
     const mql = window.matchMedia("(hover: hover) and (pointer: fine)");
     const update = () => setCanHover(mql.matches);
@@ -38,7 +38,7 @@ export default function Tooltip({ label, children, side = "top" }: TooltipProps)
   if (!canHover) return <>{children}</>;
 
   return (
-    <span className="relative inline-flex group">
+    <span className="relative inline-flex group/tooltip">
       <span aria-describedby={id} className="inline-flex">
         {children}
       </span>
@@ -50,9 +50,9 @@ export default function Tooltip({ label, children, side = "top" }: TooltipProps)
           ${pos[side]}
           absolute z-50
           pointer-events-none
-          opacity-0 group-hover:opacity-100
+          opacity-0 group-hover/tooltip:opacity-100
           transition-opacity duration-150
-          rounded-md px-2 py-1 text-xs whitespace-nowrap shadow-lg
+          ${ui.radius.sm} px-2 py-1 text-xs whitespace-nowrap ${ui.shadow.lg}
           bg-[color:var(--card-bg)]
           border border-[color:var(--glass-border)]
           text-[color:var(--foreground)]

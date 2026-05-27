@@ -1,9 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import Tooltip from "@/components/Tooltip";
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -15,127 +14,140 @@ import {
   ChevronRight,
   ListTodo,
   UserCircle,
-} from "lucide-react";
+  UserCog,
+  ClipboardList,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import Tooltip from '@/components/Tooltip';
+import { ui, cn } from '@/lib/ui';
 
-export default function Sidebar({
-  open,
-  setOpen,
-}: {
+type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+};
+
+const NAV_ITEMS: NavItem[] = [
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/products', label: 'Products', icon: ShoppingBag },
+  { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
+  { href: '/admin/customers', label: 'Customers', icon: Users },
+  { href: '/admin/users', label: 'Users', icon: UserCog },
+  { href: '/admin/tasks', label: 'Tasks', icon: ListTodo },
+  { href: '/admin/profile', label: 'Profile', icon: UserCircle },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
+];
+
+type SidebarProps = {
   open: boolean;
-  setOpen: (v: boolean) => void;
-}) {
+  setOpen: (open: boolean) => void;
+};
+
+export default function Sidebar({ open, setOpen }: SidebarProps) {
   const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
   useEffect(() => {
     if (isMobile) setCollapsed(false);
   }, [isMobile]);
 
-  const items = [
-    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin/products", label: "Products", icon: ShoppingBag },
-    { href: "/admin/orders", label: "Orders", icon: Package },
-    { href: "/admin/customers", label: "Customers", icon: Users },
-    { href: "/admin/users", label: "Users", icon: Users },
-    { href: "/admin/tasks", label: "Tasks", icon: ListTodo },
-    { href: "/admin/profile", label: "Profile", icon: UserCircle },
-    { href: "/admin/settings", label: "Settings", icon: Settings },
-  ];
+  const closeMobile = () => isMobile && setOpen(false);
+
+  const linkClass = (active: boolean, centered: boolean) =>
+    cn(
+      'sidebar-item',
+      active && 'sidebar-item-active',
+      centered && 'justify-center'
+    );
 
   return (
     <>
       {open && isMobile && (
-        <div
+        <button
+          type="button"
+          aria-label="Dismiss menu overlay"
           onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          className="fixed inset-0 z-30 bg-[color:var(--overlay)] md:hidden"
         />
       )}
 
-     <aside
-  className={`
-    glass z-40
-    bg-[color:var(--sidebar-bg)]
-    text-[color:var(--sidebar-text)]
-    overflow-visible
-
-    transition-[transform,width] duration-300 ease-in-out
-
-    ${isMobile ? "w-64 max-w-[85vw] fixed top-16 left-0 bottom-0" : "md:sticky md:top-16 md:h-[calc(100vh-4rem)]"}
-    ${isMobile ? (open ? "translate-x-0" : "-translate-x-full") : ""}
-    ${!isMobile ? (collapsed ? "md:w-20" : "md:w-64") : ""}
-  `}
->
-
-        {/* Desktop collapse toggle */}
-        <div className="hidden md:flex justify-end pt-4 pr-2 pb-2">
+      <aside
+        className={cn(
+          'z-40 overflow-visible bg-[color:var(--sidebar-bg)] text-[color:var(--sidebar-text)]',
+          'border-r border-[color:var(--glass-border)] shadow-sm',
+          'transition-[transform,width] duration-300 ease-in-out',
+          isMobile
+            ? 'fixed bottom-0 left-0 top-16 w-64 max-w-[85vw]'
+            : 'md:sticky md:top-16 md:h-[calc(100vh-4rem)]',
+          isMobile && (open ? 'translate-x-0' : '-translate-x-full'),
+          !isMobile && (collapsed ? 'md:w-20' : 'md:w-64')
+        )}
+      >
+        <div className="hidden justify-end pb-2 pr-2 pt-4 md:flex">
           <button
+            type="button"
             onClick={() => setCollapsed((c) => !c)}
-            className="text-[color:var(--sidebar-text)]/70 hover:text-[color:var(--sidebar-text)] transition"
+            className={cn(
+              ui.radius.md,
+              'p-1.5 text-[color:var(--sidebar-text)]/70 transition-colors hover:bg-[var(--sidebar-hover)] hover:text-[color:var(--sidebar-text)]',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]'
+            )}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
           </button>
         </div>
 
-        {/* Mobile close row */}
         {isMobile && (
-          <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 dark:border-white/10 md:hidden">
-            <span className="text-sm font-semibold text-[color:var(--sidebar-text)]">
-              Menu
-            </span>
-            <button onClick={() => setOpen(false)}>
+          <div className="flex items-center justify-between border-b border-[color:var(--glass-border)] px-4 py-3 md:hidden">
+            <span className="text-sm font-semibold">Menu</span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close menu"
+              className={cn(ui.radius.md, 'p-1 hover:bg-[var(--sidebar-hover)]')}
+            >
               <X size={20} />
             </button>
           </div>
         )}
 
-        {/* Navigation */}
-        <nav className="px-2 pt-3 pb-6 space-y-2">
-          {items.map((item) => {
+        <nav className="space-y-1 px-2 pb-6 pt-3" aria-label="Main navigation">
+          {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.href;
+            const showLabel = isMobile || !collapsed;
+
+            const link = (
+              <Link
+                href={item.href}
+                onClick={closeMobile}
+                className={linkClass(active, !showLabel)}
+                aria-current={active ? 'page' : undefined}
+              >
+                <Icon size={ui.icon.md} className="shrink-0" aria-hidden />
+                {showLabel && <span>{item.label}</span>}
+              </Link>
+            );
 
             return (
               <div key={item.href} className="relative">
-  {!isMobile && collapsed ? (
-    <Tooltip label={item.label} side="right">
-      <Link
-        href={item.href}
-        onClick={() => isMobile && setOpen(false)}
-        className={`
-          sidebar-item 
-          ${active ? "sidebar-item-active" : ""}
-          justify-center
-        `}
-        title={item.label} // fallback
-      >
-        <Icon size={18} className="shrink-0 text-[color:var(--sidebar-text)]" />
-      </Link>
-    </Tooltip>
-  ) : (
-    <Link
-      href={item.href}
-      onClick={() => isMobile && setOpen(false)}
-      className={`
-        sidebar-item
-        ${active ? "sidebar-item-active" : ""}
-        ${!isMobile && collapsed ? "justify-center" : ""}
-      `}
-      title={item.label}
-    >
-      <Icon size={18} className="shrink-0 text-[color:var(--sidebar-text)]" />
-      {(!collapsed || isMobile) && <span>{item.label}</span>}
-    </Link>
-  )}
-</div>
-
+                {!isMobile && collapsed ? (
+                  <Tooltip label={item.label} side="right">
+                    {link}
+                  </Tooltip>
+                ) : (
+                  link
+                )}
+              </div>
             );
           })}
         </nav>

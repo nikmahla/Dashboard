@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Package, Plus, Pencil } from "lucide-react";
 import DataTable from "@/components/DataTable";
 import Modal from "@/components/Modal";
 import ProductForm from "@/components/ProductForm";
 import useDebounce from "@/hooks/useDebounce";
 import { useToast } from "@/components/ToastContext";
 import { useApiError } from "@/hooks/useApiError";
+import { ui } from "@/lib/ui";
 import {
   Product,
   useProducts,
@@ -43,7 +45,7 @@ export default function ProductsPage() {
       {
         key: "price" as const,
         label: "Price",
-        align: "right" as const,
+        numeric: true,
         render: (r: Product) => `$${r.price}`,
       },
       { key: "status" as const, label: "Status" },
@@ -61,7 +63,7 @@ export default function ProductsPage() {
       setCreating(false);
       toast.notify({ type: "success", message: "Product created" });
     } catch (err) {
-      onApiError(err, "Could not load customers");
+      onApiError(err, "Could not create product");
     }
   };
 
@@ -91,10 +93,13 @@ export default function ProductsPage() {
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Products</h2>
-      </div>
+    <div className={ui.spacing.pageY}>
+      <header>
+        <h1 className={ui.typography.pageTitle}>Products</h1>
+        <p className={`mt-1 ${ui.typography.pageSubtitle}`}>
+          Manage catalog items, pricing, and stock status
+        </p>
+      </header>
 
       <DataTable
         data={products}
@@ -115,38 +120,60 @@ export default function ProductsPage() {
           setPageSize(s);
           setPage(1);
         }}
+        entityLabel="Product"
+        deleteTitle="Delete product?"
+        deleteDescription="This product will be permanently removed from your catalog."
+        getDeleteLabel={(r) => (r as Product).name}
         onView={(r) => setViewing(r)}
         onEdit={(r) => setEditing(r)}
         onDelete={(r) => onDelete(r as Product)}
         onCreate={() => setCreating(true)}
       />
 
-      <Modal open={creating} onClose={() => setCreating(false)} title="Add Product">
+      <Modal
+        open={creating}
+        onClose={() => setCreating(false)}
+        title="Add product"
+        subtitle="Fill in the details below to add a new catalog item"
+        icon={<Plus size={18} />}
+      >
         <ProductForm onSubmit={onCreate} />
       </Modal>
 
-      <Modal open={!!editing} onClose={() => setEditing(null)} title="Edit Product">
+      <Modal
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        title="Edit product"
+        subtitle="Update product information"
+        icon={<Pencil size={18} />}
+      >
         {editing && <ProductForm initial={editing} onSubmit={onUpdate} />}
       </Modal>
 
-      <Modal open={!!viewing} onClose={() => setViewing(null)} title="Product Details">
+      <Modal
+        open={!!viewing}
+        onClose={() => setViewing(null)}
+        title="Product details"
+        subtitle="Read-only view of this catalog item"
+        icon={<Package size={18} />}
+      >
         {viewing && (
-          <div className="space-y-3">
-            <div>
-              <p className="text-xs text-slate-400">Name</p>
-              <p className="font-medium">{viewing.name}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Price</p>
-              <p className="font-medium">${viewing.price}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Status</p>
-              <p className="font-medium">{viewing.status}</p>
-            </div>
-          </div>
+          <dl className="space-y-4">
+            <DetailField label="Name" value={viewing.name} />
+            <DetailField label="Price" value={`$${viewing.price}`} />
+            <DetailField label="Status" value={viewing.status} />
+          </dl>
         )}
       </Modal>
+    </div>
+  );
+}
+
+function DetailField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className={ui.typography.caption}>{label}</dt>
+      <dd className="mt-0.5 text-sm font-medium text-[color:var(--foreground)]">{value}</dd>
     </div>
   );
 }

@@ -37,8 +37,8 @@ export default function CustomersPage() {
   const updateCustomer = useUpdateCustomer(params);
   const deleteCustomer = useDeleteCustomer(params);
 
-  const customers = customersQuery.data?.data ?? [];
-  const total = customersQuery.data?.total ?? 0;
+  const customers: Customer[] = (customersQuery.data as any)?.data ?? [];
+  const total = (customersQuery.data as any)?.total ?? 0;
 
   const loading =
   customersQuery.isLoading ||     
@@ -111,12 +111,15 @@ const refreshing = customersQuery.isFetching && !customersQuery.isLoading;
         columns={[
           { key: "name", label: "Name" },
           { key: "email", label: "Email" },
-          { key: "orders", label: "Orders", align: "right" },
+          { key: "orders", label: "Orders", numeric: true },
         ]}
         onView={(row) => setViewing(row)}
         onEdit={(row) => setEditing(row)}
         onDelete={(row) => handleDelete(row)}
         onCreate={() => setCreating(true)}
+        entityLabel="Customer"
+        deleteTitle="Delete customer?"
+        deleteDescription="This customer record will be permanently removed."
         getDeleteLabel={(row) => `${row.name} (${row.email})`}
       />
 

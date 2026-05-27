@@ -1,16 +1,28 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { Search, Eye, Pencil, Trash } from "lucide-react";
-import SwipeCard from "./SwipeCard";
+import { Eye, Pencil, Trash, MoreHorizontal } from "lucide-react";
 import ConfirmModal from "./ConfirmModal";
 import EmptyState from "./EmptyState";
 import Tooltip from "./Tooltip";
+import SearchField from "@/components/ui/SearchField";
+import { TableSkeleton, MobileTableSkeleton } from "@/components/ui/TableSkeleton";
+import {
+  getColumnAlign,
+  getColumnWidthKind,
+  columnWidthClass,
+  headerAlignClass,
+  headerFlexClass,
+} from "@/lib/table-utils";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { ui, cn } from "@/lib/ui";
 
-type Column<T> = {
+export type Column<T> = {
   key: keyof T;
   label: string;
   align?: "left" | "right";
+  /** Force right-align for numeric comparison */
+  numeric?: boolean;
   render?: (row: T) => React.ReactNode;
   sortable?: boolean;
 };
@@ -19,35 +31,171 @@ type Props<T> = {
   data: T[];
   columns: Column<T>[];
   searchableKey?: keyof T;
-
   serverSide?: boolean;
   query?: string;
   onQueryChange?: (q: string) => void;
   loading?: boolean;
-
   page?: number;
   pageSize?: number;
   total?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
-
   sortKey?: keyof T | null;
   sortDir?: "asc" | "desc" | null;
   onSort?: (key: keyof T, dir: "asc" | "desc") => void;
-
   onView?: (row: T) => void;
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
   onCreate?: () => void;
-
   containerClassName?: string;
   containerStyle?: React.CSSProperties;
   height?: string;
-
   showRowNumbers?: boolean;
-
   getDeleteLabel?: (row: T) => string;
+  entityLabel?: string;
+  deleteTitle?: string;
+  deleteDescription?: string;
 };
+
+function RowActions<T>({
+  row,
+  onView,
+  onEdit,
+  onDelete,
+  onDeleteClick,
+}: {
+  row: T;
+  onView?: (row: T) => void;
+  onEdit?: (row: T) => void;
+  onDelete?: (row: T) => void;
+  onDeleteClick: (row: T) => void;
+}) {
+  const hasActions = onView || onEdit || onDelete;
+  if (!hasActions) return null;
+
+  return (
+    <div className="data-table-actions">
+      {onView && (
+        <Tooltip label="View" side="top">
+          <button
+            type="button"
+            onClick={() => onView(row)}
+            className="data-table-action data-table-action--view"
+            aria-label="View"
+          >
+            <Eye size={17} />
+          </button>
+        </Tooltip>
+      )}
+      {onEdit && (
+        <Tooltip label="Edit" side="top">
+          <button
+            type="button"
+            onClick={() => onEdit(row)}
+            className="data-table-action data-table-action--edit"
+            aria-label="Edit"
+          >
+            <Pencil size={17} />
+          </button>
+        </Tooltip>
+      )}
+      {onDelete && (
+        <Tooltip label="Delete" side="top">
+          <button
+            type="button"
+            onClick={() => onDeleteClick(row)}
+            className="data-table-action data-table-action--delete"
+            aria-label="Delete"
+          >
+            <Trash size={17} />
+          </button>
+        </Tooltip>
+      )}
+    </div>
+  );
+}
+
+function MobileRowCard<T extends { id?: number }>({
+  row,
+  rowNumber,
+  columns,
+  columnAligns,
+  showRowNumbers,
+  onView,
+  onEdit,
+  onDelete,
+  onDeleteClick,
+}: {
+  row: T;
+  rowNumber: number;
+  columns: Column<T>[];
+  columnAligns: Map<string, "left" | "right">;
+  showRowNumbers: boolean;
+  onView?: (row: T) => void;
+  onEdit?: (row: T) => void;
+  onDelete?: (row: T) => void;
+  onDeleteClick: (row: T) => void;
+}) {
+  const primary = columns[0];
+  const hasActions = onView || onEdit || onDelete;
+
+  return (
+    <article
+      className="data-table-mobile-card p-4 space-y-3"
+      aria-label={`Row ${rowNumber}`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          {showRowNumbers && (
+            <p className="text-[10px] font-medium uppercase tracking-wide text-[color:var(--muted)]">
+              #{rowNumber}
+            </p>
+          )}
+          <p className="text-sm font-semibold text-[color:var(--foreground)] truncate">
+            {primary.render
+              ? primary.render(row)
+              : String(row[primary.key] ?? "")}
+          </p>
+        </div>
+        {hasActions && (
+          <div className="flex shrink-0 items-center gap-0.5" aria-label="Actions">
+            <RowActions
+              row={row}
+              onView={onView}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onDeleteClick={onDeleteClick}
+            />
+          </div>
+        )}
+      </div>
+
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+        {columns.slice(1).map((col) => {
+          const align = columnAligns.get(String(col.key)) ?? "left";
+          return (
+            <div
+              key={String(col.key)}
+              className={cn(align === "right" && "col-span-2 text-right sm:col-span-1")}
+            >
+              <dt className="text-[10px] font-medium uppercase tracking-wide text-[color:var(--muted)]">
+                {col.label}
+              </dt>
+              <dd
+                className={cn(
+                  "mt-0.5 text-sm text-[color:var(--foreground)]",
+                  align === "right" && "tabular-nums font-medium"
+                )}
+              >
+                {col.render ? col.render(row) : String(row[col.key] ?? "")}
+              </dd>
+            </div>
+          );
+        })}
+      </dl>
+    </article>
+  );
+}
 
 export default function DataTable<T extends { id?: number }>({
   data,
@@ -56,7 +204,7 @@ export default function DataTable<T extends { id?: number }>({
   serverSide,
   query,
   onQueryChange,
-  loading,
+  loading = false,
   page,
   pageSize,
   total,
@@ -73,29 +221,20 @@ export default function DataTable<T extends { id?: number }>({
   containerStyle,
   height,
   getDeleteLabel,
+  entityLabel = "Item",
+  deleteTitle = "Delete item?",
+  deleteDescription = "This action cannot be undone. The item will be permanently removed.",
   showRowNumbers = true,
 }: Props<T>) {
   const [internalQuery, setInternalQuery] = useState("");
   const [deleteRow, setDeleteRow] = useState<T | null>(null);
-
   const [internalPage, setInternalPage] = useState(page ?? 1);
   const [internalPageSize, setInternalPageSize] = useState(pageSize ?? 10);
-
   const [internalSortKey, setInternalSortKey] = useState<keyof T | null>(sortKey ?? null);
-  const [internalSortDir, setInternalSortDir] = useState<"asc" | "desc" | null>(
-    sortDir ?? null
-  );
-const [showSpinner, setShowSpinner] = useState(false);
+  const [internalSortDir, setInternalSortDir] = useState<"asc" | "desc" | null>(sortDir ?? null);
 
-useEffect(() => {
-  if (!loading) {
-    setShowSpinner(false);
-    return;
-  }
-  const t = setTimeout(() => setShowSpinner(true), 200);
-  return () => clearTimeout(t);
-}, [loading]);
-  const [openRow, setOpenRow] = useState<number | null>(null);
+  const hasRowActions = !!(onView || onEdit || onDelete);
+  const isMobile = useMediaQuery("(max-width: 639px)");
 
   useEffect(() => {
     if (page !== undefined) setInternalPage(page);
@@ -120,10 +259,8 @@ useEffect(() => {
   const baseFiltered = useMemo(() => {
     if (!searchableKey) return data;
     if (serverSide) return data;
-
     const q = effectiveQuery.trim().toLowerCase();
     if (!q) return data;
-
     return data.filter((item) =>
       String(item[searchableKey] ?? "").toLowerCase().includes(q)
     );
@@ -131,11 +268,13 @@ useEffect(() => {
 
   const sorted = useMemo(() => {
     if (!internalSortKey || !internalSortDir) return baseFiltered;
-
     const copy = [...baseFiltered];
-    copy.sort((a: T, b: T) => {
+    copy.sort((a, b) => {
       const av = a[internalSortKey];
       const bv = b[internalSortKey];
+      if (typeof av === "number" && typeof bv === "number") {
+        return internalSortDir === "asc" ? av - bv : bv - av;
+      }
       const sa = String(av ?? "");
       const sb = String(bv ?? "");
       if (sa < sb) return internalSortDir === "asc" ? -1 : 1;
@@ -149,9 +288,20 @@ useEffect(() => {
   const pageSizeInternal = pageSize ?? internalPageSize;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSizeInternal));
   const currentPage = page ?? internalPage;
-
   const pageStart = (currentPage - 1) * pageSizeInternal;
   const pageData = sorted.slice(pageStart, pageStart + pageSizeInternal);
+
+  const columnAligns = useMemo(() => {
+    const map = new Map<string, "left" | "right">();
+    const sample = pageData[0] ?? data[0];
+    for (const col of columns) {
+      const value = sample ? sample[col.key] : undefined;
+      map.set(String(col.key), getColumnAlign(col, value));
+    }
+    return map;
+  }, [columns, pageData, data]);
+
+  const skeletonRows = Math.min(pageSizeInternal, 6);
 
   const handlePageChange = (p: number) => {
     if (onPageChange) return onPageChange(p);
@@ -168,7 +318,6 @@ useEffect(() => {
     if (!sortable) return;
     const nextDir =
       internalSortKey !== key ? "asc" : internalSortDir === "asc" ? "desc" : "asc";
-
     if (onSort) return onSort(key, nextDir);
     setInternalSortKey(key);
     setInternalSortDir(nextDir);
@@ -176,7 +325,6 @@ useEffect(() => {
 
   const deleteLabel = useMemo<string | undefined>(() => {
     if (!deleteRow) return undefined;
-
     if (getDeleteLabel) {
       try {
         const v = getDeleteLabel(deleteRow);
@@ -185,107 +333,60 @@ useEffect(() => {
         return undefined;
       }
     }
-
-    const rowAny = deleteRow as any;
+    const rowAny = deleteRow as Record<string, unknown>;
     const keys = [
       searchableKey ? String(searchableKey) : undefined,
-      columns?.[0]?.key ? String(columns[0].key) : undefined,
+      columns[0]?.key ? String(columns[0].key) : undefined,
       "name",
       "title",
       "customer",
       "email",
-      "id",
     ].filter(Boolean) as string[];
-
     for (const k of keys) {
-      const v = rowAny?.[k];
+      const v = rowAny[k];
       if (v !== undefined && v !== null && String(v).trim() !== "") return String(v);
     }
-
     return undefined;
   }, [deleteRow, getDeleteLabel, searchableKey, columns]);
 
+  const toolbar = (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      {searchableKey && (
+        <SearchField
+          className="w-full max-w-sm flex-1 min-w-[200px]"
+          value={effectiveQuery}
+          onChange={(v) => {
+            if (onQueryChange) return onQueryChange(v);
+            setInternalQuery(v);
+          }}
+          placeholder={`Search ${String(searchableKey)}…`}
+        />
+      )}
+      {onCreate && (
+        <button type="button" onClick={onCreate} className="btn-primary ml-auto px-4 py-2 text-sm font-medium shrink-0">
+          New
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div className="w-full space-y-4">
-      
-      {/* Desktop-only header actions (keep your original) */}
-      <div className="hidden sm:flex items-center justify-between gap-3">
-        {searchableKey && (
-          <div
-            className="
-              flex items-center gap-2 max-w-sm
-              bg-[color:var(--card-bg)]
-              border border-[color:var(--glass-border)]
-              rounded-xl px-3 py-2
-              shadow-sm
-            "
-          >
-            <Search size={16} className="text-[color:var(--muted)]" />
-            <input
-              value={effectiveQuery}
-              onChange={(e) => {
-                const v = e.target.value;
-                if (onQueryChange) return onQueryChange(v);
-                setInternalQuery(v);
-              }}
-              placeholder={`Search by ${String(searchableKey)}...`}
-              className="
-                w-full bg-transparent outline-none text-sm
-                text-[color:var(--foreground)]
-                placeholder:text-[color:var(--muted)]
-              "
-            />
-          </div>
-        )}
+      {!isMobile && <div>{toolbar}</div>}
 
-        {onCreate && (
-          <button
-            onClick={onCreate}
-            className="
-              btn-primary ml-auto
-              px-4 py-2 rounded-xl text-sm font-medium
-              shadow-md hover:opacity-90 active:scale-95
-              transition-all
-            "
-          >
-            New
-          </button>
-        )}
-      </div>
-
-      {/* Table container */}
       <div
-        className={`
-          glass-soft rounded-2xl
-          border border-[color:var(--glass-border)]
-          shadow-[0_4px_20px_rgba(0,0,0,0.08)]
-          overflow-hidden relative flex flex-col min-h-0
-          ${containerClassName ?? ""}
-        `}
+        className={cn(ui.table.shell, containerClassName)}
         style={{
           ...(containerStyle ?? {}),
           ...(height ? { height } : { height: "60vh" }),
         }}
       >
-        {(loading && showSpinner) && (
-          <div
-            className="
-              absolute inset-0
-              bg-white/60 dark:bg-slate-900/60
-              backdrop-blur-sm
-              flex items-center justify-center
-              z-40
-            "
-          >
-            <div className="h-8 w-8 border-4 border-t-transparent border-[color:var(--primary)] rounded-full animate-spin" />
-          </div>
-        )}
-
         <ConfirmModal
           open={!!deleteRow}
-          title="Delete item?"
-          description="This action cannot be undone."
-          itemLabel={deleteLabel}
+          title={deleteTitle}
+          description={deleteDescription}
+          entityLabel={entityLabel}
+          itemName={deleteLabel}
           onCancel={() => setDeleteRow(null)}
           onConfirm={() => {
             if (deleteRow) onDelete?.(deleteRow);
@@ -293,330 +394,235 @@ useEffect(() => {
           }}
         />
 
-        {/* ✅ Mobile sticky header (INSIDE the container so sticky works) */}
-        <div
-          className="
-            sm:hidden
-            sticky top-0 z-30
-            bg-[color:var(--card-bg)]
-            backdrop-blur-md
-            border-b border-[color:var(--glass-border)]
-            px-4 py-3
-          "
-        >
-          <div className="flex items-center gap-3">
-            {searchableKey && (
-              <div
-                className="
-                  flex items-center gap-2 w-full
-                  border border-[color:var(--glass-border)]
-                  rounded-xl px-3 py-2
-                "
-              >
-                <Search size={16} className="text-[color:var(--muted)]" />
-                <input
-                  value={effectiveQuery}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (onQueryChange) return onQueryChange(v);
-                    setInternalQuery(v);
-                  }}
-                  placeholder={`Search by ${String(searchableKey)}...`}
-                  className="w-full bg-transparent outline-none text-sm text-[color:var(--foreground)]"
-                />
-              </div>
-            )}
+        {isMobile && (
+          <div className="sticky top-0 z-30 shrink-0 border-b border-[color:var(--table-row-border)] bg-[color:var(--card-bg)] px-3 py-3 backdrop-blur-md">
+            {toolbar}
+          </div>
+        )}
 
-            {onCreate && (
-              <button
-                onClick={onCreate}
-                className="btn-primary px-4 py-2 rounded-xl text-sm font-medium"
-              >
-                New
-              </button>
+        {isMobile ? (
+        <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3">
+          {loading ? (
+            <MobileTableSkeleton rows={skeletonRows} />
+          ) : pageData.length === 0 ? (
+            <EmptyState title="No results" description="Try adjusting your search or filters." />
+          ) : (
+            pageData.map((row, i) => (
+              <MobileRowCard
+                key={row.id ?? i}
+                row={row}
+                rowNumber={pageStart + i + 1}
+                columns={columns}
+                columnAligns={columnAligns}
+                showRowNumbers={showRowNumbers}
+                onView={onView}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onDeleteClick={setDeleteRow}
+              />
+            ))
+          )}
+        </div>
+        ) : (
+        <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+          <div className="flex-1 overflow-x-auto overflow-y-auto min-h-0">
+            {loading ? (
+              <TableSkeleton
+                rows={skeletonRows}
+                columns={columns.length}
+                showActions={hasRowActions}
+                showRowNumbers={showRowNumbers}
+              />
+            ) : (
+              <table className={ui.table.table}>
+                <colgroup>
+                  {showRowNumbers && (
+                    <col className={columnWidthClass("index")} />
+                  )}
+                  {columns.map((col, colIndex) => {
+                    const align =
+                      columnAligns.get(String(col.key)) ??
+                      getColumnAlign(col, undefined);
+                    const kind = getColumnWidthKind(col, colIndex, align);
+                    return (
+                      <col
+                        key={String(col.key)}
+                        className={columnWidthClass(kind)}
+                      />
+                    );
+                  })}
+                  {hasRowActions && (
+                    <col className={columnWidthClass("actions")} />
+                  )}
+                </colgroup>
+                <thead className="sticky top-0 z-10 bg-[color:var(--table-head-bg)] backdrop-blur-sm">
+                  <tr>
+                    {showRowNumbers && (
+                      <th className={cn(headerAlignClass("right"), "tabular-nums")}>#</th>
+                    )}
+                    {columns.map((col, colIndex) => {
+                      const align =
+                        columnAligns.get(String(col.key)) ??
+                        getColumnAlign(col, undefined);
+                      return (
+                        <th
+                          key={String(col.key)}
+                          className={cn(
+                            headerAlignClass(align),
+                            col.sortable && "cursor-pointer select-none hover:text-[color:var(--foreground)]"
+                          )}
+                          onClick={() => handleSortToggle(col.key, !!col.sortable)}
+                        >
+                          <div
+                            className={cn(
+                              "flex items-center gap-1.5",
+                              headerFlexClass(align)
+                            )}
+                          >
+                            <span>{col.label}</span>
+                            {col.sortable && (
+                              <span className="text-[10px] opacity-60">
+                                {internalSortKey === col.key
+                                  ? internalSortDir === "asc"
+                                    ? "▲"
+                                    : "▼"
+                                  : "↕"}
+                              </span>
+                            )}
+                          </div>
+                        </th>
+                      );
+                    })}
+                    {hasRowActions && (
+                      <th className="text-right">
+                        <span className="sr-only">Actions</span>
+                        <MoreHorizontal size={14} className="inline opacity-40" aria-hidden />
+                      </th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {pageData.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={
+                          columns.length + (hasRowActions ? 1 : 0) + (showRowNumbers ? 1 : 0)
+                        }
+                        className="!border-0 py-12"
+                      >
+                        <EmptyState
+                          title="No data available"
+                          description="Once data is added, it will appear here."
+                        />
+                      </td>
+                    </tr>
+                  ) : (
+                    pageData.map((row, i) => (
+                      <tr key={row.id ?? i} className="data-table-row">
+                        {showRowNumbers && (
+                          <td className="tabular-nums text-right text-[color:var(--muted)] text-xs">
+                            {pageStart + i + 1}
+                          </td>
+                        )}
+                        {columns.map((col) => {
+                          const align =
+                            columnAligns.get(String(col.key)) ??
+                            getColumnAlign(col, row[col.key]);
+                          return (
+                            <td
+                              key={String(col.key)}
+                              className={cn(
+                                headerAlignClass(align),
+                                align === "right" && "tabular-nums font-medium",
+                                "truncate max-w-0"
+                              )}
+                              title={
+                                col.render
+                                  ? undefined
+                                  : String(row[col.key] ?? "")
+                              }
+                            >
+                              <span className="block truncate">
+                                {col.render ? col.render(row) : String(row[col.key] ?? "")}
+                              </span>
+                            </td>
+                          );
+                        })}
+                        {hasRowActions && (
+                          <td className="text-right">
+                            <RowActions
+                              row={row}
+                              onView={onView}
+                              onEdit={onEdit}
+                              onDelete={onDelete}
+                              onDeleteClick={setDeleteRow}
+                            />
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             )}
           </div>
         </div>
-
-        {/* ✅ Mobile cards (SCROLL AREA) */}
-        <div className="block sm:hidden flex-1 overflow-y-auto min-h-0 pt-4 px-1 divide-y divide-white/10">
-          {pageData.length === 0 && (
-            <EmptyState title="No results" description="Try adjusting your search or filters." />
-          )}
-
-          {pageData.map((row, i) => {
-            const rowNumber = pageStart + i + 1;
-            const key = row.id ?? i;
-            const isOpen = openRow === key;
-
-            return (
-              <SwipeCard key={key} onView={() => onView?.(row)} onDelete={() => setDeleteRow(row)}>
-                <div className="p-4 space-y-3">
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      {showRowNumbers && (
-                        <p className="text-xs text-[color:var(--muted)]">No. {rowNumber}</p>
-                      )}
-
-                      <p className="text-sm font-medium text-[color:var(--foreground)]">
-                        {columns[0].render
-                          ? columns[0].render(row)
-                          : String(row[columns[0].key] ?? "")}
-                      </p>
-                    </div>
-
-                    {/* ✅ toggle ONLY by triangle */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenRow(isOpen ? null : key);
-                      }}
-                      className={`
-                        cursor-pointer p-2 -mr-2
-                        transition-transform duration-300
-                        ${isOpen ? "rotate-180" : "rotate-0"}
-                        text-[color:var(--muted)]
-                      `}
-                      aria-label="Toggle row details"
-                    >
-                      ▼
-                    </button>
-                  </div>
-
-                  {/* Expandable content */}
-                  <div
-                    className={`
-                      overflow-hidden transition-all duration-300
-                      ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}
-                    `}
-                  >
-                    <div className="pt-3 space-y-3">
-                      {columns.slice(1).map((col) => (
-                        <div key={String(col.key)}>
-                          <p className="text-xs text-[color:var(--muted)]">{col.label}</p>
-                          <p className="text-sm font-medium text-[color:var(--foreground)]">
-                            {col.render ? col.render(row) : String(row[col.key] ?? "")}
-                          </p>
-                        </div>
-                      ))}
-
-                      {/* Actions */}
-                      <div className="flex items-center gap-4 pt-2">
-                        {onView && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onView(row);
-                            }}
-                            className="text-[color:var(--primary)] text-sm"
-                          >
-                            View
-                          </button>
-                        )}
-
-                        {onEdit && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onEdit(row);
-                            }}
-                            className="text-yellow-500 text-sm"
-                          >
-                            Edit
-                          </button>
-                        )}
-
-                        {onDelete && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteRow(row);
-                            }}
-                            className="text-red-500 text-sm"
-                          >
-                            Delete
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </SwipeCard>
-            );
-          })}
-        </div>
-
-        {/* Desktop table */}
-        <div className="hidden sm:block overflow-x-auto overflow-y-auto flex-1 min-h-0 pt-0">
-          <table className="w-full min-w-full text-sm table-auto">
-            <thead
-              className="
-                bg-[color:var(--card-bg)]
-                border-b border-[color:var(--glass-border)]
-                sticky top-0 z-10 
-                backdrop-blur-md  
-                mt-0
-              "
-            >
-              <tr>
-                {showRowNumbers && (
-                  <th className="px-4 py-3 font-medium text-left text-[color:var(--muted)]">#</th>
-                )}
-
-                {columns.map((col) => (
-                  <th
-                    key={String(col.key)}
-                    className={`
-                      px-4 py-3 font-medium whitespace-nowrap
-                      text-[color:var(--muted)]
-                      ${col.align === "right" ? "text-right" : "text-left"}
-                      ${col.sortable ? "cursor-pointer hover:text-[color:var(--foreground)]" : ""}
-                    `}
-                    onClick={() => handleSortToggle(col.key, !!col.sortable)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>{col.label}</span>
-                      {col.sortable && (
-                        <span className="text-xs text-[color:var(--muted)]">
-                          {internalSortKey === col.key
-                            ? internalSortDir === "asc"
-                              ? "▲"
-                              : "▼"
-                            : "↕"}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                ))}
-
-                {(onView || onEdit || onDelete) && (
-                  <th className="px-4 py-3 text-right text-[color:var(--muted)]">Actions</th>
-                )}
-              </tr>
-            </thead>
-
-            <tbody>
-              {pageData.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={
-                      columns.length +
-                      (onView || onEdit || onDelete ? 1 : 0) +
-                      (showRowNumbers ? 1 : 0)
-                    }
-                  >
-                    <EmptyState title="No data available" description="Once data is added, it will appear here." />
-                  </td>
-                </tr>
-              ) : (
-                pageData.map((row, i) => (
-                  <tr key={row.id ?? i} className="transition-all duration-200 hover:bg-white/5">
-                    {showRowNumbers && (
-                      <td className="px-4 py-3 text-[color:var(--foreground)]">{pageStart + i + 1}</td>
-                    )}
-
-                    {columns.map((col) => (
-                      <td
-                        key={String(col.key)}
-                        className={`
-                          px-4 py-3 text-[color:var(--foreground)]
-                          ${col.align === "right" ? "text-right" : "text-left"}
-                        `}
-                      >
-                        {col.render ? col.render(row) : String(row[col.key] ?? "")}
-                      </td>
-                    ))}
-
-                    {(onView || onEdit || onDelete) && (
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-2">
-                          {onView && (
-                            <Tooltip label="View" side="top">
-                              <button
-                                onClick={() => onView(row)}
-                                className="cursor-pointer text-[color:var(--primary)] p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition"
-                                aria-label="View"
-                              >
-                                <Eye size={18} />
-                              </button>
-                            </Tooltip>
-                          )}
-
-                          {onEdit && (
-                            <Tooltip label="Edit" side="top">
-                              <button
-                                onClick={() => onEdit(row)}
-                                className="cursor-pointer text-yellow-500 p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition"
-                                aria-label="Edit"
-                              >
-                                <Pencil size={18} />
-                              </button>
-                            </Tooltip>
-                          )}
-
-                          {onDelete && (
-                            <Tooltip label="Delete" side="top">
-                              <button
-                                onClick={() => setDeleteRow(row)}
-                                className="cursor-pointer text-red-500 p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition"
-                                aria-label="Delete"
-                              >
-                                <Trash size={18} />
-                              </button>
-                            </Tooltip>
-                          )}
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        )}
 
         {/* Footer */}
         <div
-          className="
-            px-4 py-3 border-t border-[color:var(--glass-border)]
-            text-xs text-[color:var(--muted)]
-            flex items-center justify-between
-            bg-[color:var(--card-bg)]
-          "
+          className={cn(
+            ui.table.footer,
+            "px-4 py-3 text-xs text-[color:var(--muted)] flex flex-wrap items-center justify-between gap-3 shrink-0"
+          )}
         >
-          <div>Showing {pageData.length} of {totalItems}</div>
-
+          <div>
+            {loading ? (
+              <span className="animate-pulse">Loading…</span>
+            ) : (
+              <>
+                Showing{" "}
+                <span className="font-medium text-[color:var(--foreground)]">{pageData.length}</span> of{" "}
+                <span className="font-medium text-[color:var(--foreground)]">{totalItems}</span>
+              </>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <select
               value={pageSizeInternal}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              className="
-                bg-transparent border border-[color:var(--glass-border)]
-                rounded px-2 py-1 text-sm
-                text-[color:var(--foreground)]
-              "
+              disabled={loading}
+              className="input !w-auto py-1.5 px-2 text-sm"
+              aria-label="Rows per page"
             >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
+              <option value={10}>10 / page</option>
+              <option value={25}>25 / page</option>
+              <option value={50}>50 / page</option>
             </select>
-
             <button
+              type="button"
               onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-              className="px-3 py-1 rounded bg-white/5 hover:bg-white/10 transition-all"
+              disabled={currentPage <= 1 || loading}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-sm font-medium border border-[color:var(--glass-border)]",
+                "text-[color:var(--foreground)] hover:bg-[var(--primary-soft)]",
+                "disabled:opacity-40 disabled:pointer-events-none transition-colors"
+              )}
             >
               Prev
             </button>
-
-            <span className="px-2 text-[color:var(--foreground)]">
+            <span className="min-w-[4rem] text-center tabular-nums text-[color:var(--foreground)]">
               {currentPage} / {totalPages}
             </span>
-
             <button
+              type="button"
               onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-              className="px-3 py-1 rounded bg-white/5 hover:bg-white/10 transition-all"
+              disabled={currentPage >= totalPages || loading}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-sm font-medium border border-[color:var(--glass-border)]",
+                "text-[color:var(--foreground)] hover:bg-[var(--primary-soft)]",
+                "disabled:opacity-40 disabled:pointer-events-none transition-colors"
+              )}
             >
               Next
             </button>
