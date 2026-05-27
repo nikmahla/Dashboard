@@ -10,6 +10,17 @@ html, body, #__next {
   overflow-y: scroll;
 }
 
+body {
+  min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+:root {
+  color-scheme: light;
+}
+
 /* ------------------------------
    LIGHT THEME — MIDNIGHT PURPLE
 --------------------------------*/
@@ -50,12 +61,23 @@ html, body, #__next {
   /* Derived */
   --primary-soft: rgba(139,92,246,0.12);
   --teal-soft: rgba(99,102,241,0.12);
-  --table-head-bg: rgba(139,92,246,0.06);
-  --table-row-border: rgba(228,226,236,0.8);
-  --table-row-hover: rgba(139,92,246,0.04);
+  --table-head-bg: rgba(139,92,246,0.08);
+  --table-row-border: rgba(228,226,236,0.9);
+  --table-row-hover: rgba(139,92,246,0.08);
+  --table-zebra-odd: #FFFFFF;
+  --table-zebra-even: rgba(139, 92, 246, 0.045);
+  --table-border-accent: rgba(139, 92, 246, 0.22);
+  --surface-hover: rgba(15, 23, 42, 0.05);
+  --overlay: rgba(15, 23, 42, 0.45);
+  --success-soft: rgba(16, 185, 129, 0.16);
+  --warning-soft: rgba(251, 191, 36, 0.16);
+  --toggle-knob: #ffffff;
+  --breadcrumb-bg: rgba(255, 255, 255, 0.85);
+  --breadcrumb-border: var(--border-default);
 
  /* Sidebar */
-  --sidebar-bg: #f3f4f6;
+  --sidebar-bg: #eceef2;
+  --danger-soft: rgba(239, 68, 68, 0.12);
   --sidebar-text: #111827;         
   --sidebar-muted: #6b7280;
   --sidebar-hover: #e5e7eb;
@@ -68,6 +90,7 @@ html, body, #__next {
    DARK THEME — MIDNIGHT PURPLE
 --------------------------------*/
 .dark {
+  color-scheme: dark;
   /* Base */
   --bg-default: #0D0B12;      /* deep purple-black */
   --bg-muted: #16131F;        /* card */
@@ -91,7 +114,7 @@ html, body, #__next {
   --glass-border: var(--border-default);
   --glass-shadow: rgba(0,0,0,0.6);
 
---foreground: var(--text-primary);
+  --foreground: var(--text-primary);
   --muted: var(--text-secondary);
 
   /* Semantic */
@@ -104,13 +127,24 @@ html, body, #__next {
   /* Derived */
   --primary-soft: rgba(139,92,246,0.12);
   --teal-soft: rgba(99,102,241,0.12);
-  --table-head-bg: rgba(255,255,255,0.03);
-  --table-row-border: rgba(255,255,255,0.06);
-  --table-row-hover: rgba(139,92,246,0.05);
+  --table-head-bg: rgba(139, 92, 246, 0.1);
+  --table-row-border: rgba(255, 255, 255, 0.08);
+  --table-row-hover: rgba(139, 92, 246, 0.12);
+  --table-zebra-odd: var(--card-bg);
+  --table-zebra-even: rgba(139, 92, 246, 0.06);
+  --table-border-accent: rgba(139, 92, 246, 0.35);
+  --surface-hover: rgba(255, 255, 255, 0.08);
+  --overlay: rgba(255, 255, 255, 0.12);
+  --success-soft: rgba(16, 185, 129, 0.18);
+  --warning-soft: rgba(251, 191, 36, 0.16);
+  --toggle-knob: #ffffff;
+  --breadcrumb-bg: rgba(22, 19, 31, 0.9);
+  --breadcrumb-border: var(--border-default);
 
  
   /* Sidebar */
-  --sidebar-bg: #0f172a;
+  --sidebar-bg: #14121c;
+  --danger-soft: rgba(239, 68, 68, 0.18);
   --sidebar-text: #e5e7eb;
   --sidebar-muted: #94a3b8;
   --sidebar-hover: #1e293b;
@@ -203,8 +237,186 @@ aside.glass {
 }
 
 /* ------------------------------
-   TABLES
+   TABLES — minimalist, hover actions
 --------------------------------*/
+.data-table-shell {
+  background: var(--card-bg);
+  border: 1px solid var(--table-border-accent);
+  box-shadow: 0 2px 16px var(--glass-shadow);
+}
+
+.data-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+/* Column widths — even, predictable spacing */
+.data-table col.data-table-col-index {
+  width: 3.25rem;
+}
+
+.data-table col.data-table-col-primary {
+  width: 34%;
+}
+
+.data-table col.data-table-col-text {
+  width: 22%;
+}
+
+.data-table col.data-table-col-numeric {
+  width: 9.5rem;
+}
+
+.data-table col.data-table-col-actions {
+  width: 7.25rem;
+}
+
+.data-table thead {
+  border-bottom: 2px solid var(--primary);
+}
+
+.data-table thead th {
+  background: var(--table-head-bg);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  padding: 0.75rem 1.25rem;
+  vertical-align: bottom;
+}
+
+.data-table thead th:first-child {
+  padding-left: 1.5rem;
+}
+
+.data-table thead th:last-child {
+  padding-right: 1.5rem;
+}
+
+.data-table tbody td {
+  border-bottom: 1px solid var(--table-row-border);
+  border-left: none;
+  border-right: none;
+  padding: 0.875rem 1.25rem;
+  color: var(--foreground);
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-table tbody td:first-child {
+  padding-left: 1.5rem;
+}
+
+.data-table tbody td:last-child {
+  padding-right: 1.5rem;
+}
+
+.data-table tbody tr.data-table-row {
+  background: transparent;
+  cursor: default;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.data-table tbody tr.data-table-row:hover,
+.data-table tbody tr.data-table-row:focus-within {
+  background: var(--table-row-hover);
+  cursor: pointer;
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.data-table tbody tr.data-table-row:last-child td {
+  border-bottom: none;
+}
+
+.data-table-footer {
+  background: var(--card-bg);
+  border-top: 1px solid var(--table-row-border);
+}
+
+/* Contextual row actions — visible on hover / focus */
+.data-table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.data-table-row:hover .data-table-actions,
+.data-table-row:focus-within .data-table-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  .data-table-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.data-table-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.data-table-action:hover {
+  transform: scale(1.05);
+}
+
+.data-table-action--view {
+  color: var(--primary);
+}
+.data-table-action--view:hover {
+  background: var(--primary-soft);
+}
+
+.data-table-action--edit {
+  color: var(--info);
+}
+.data-table-action--edit:hover {
+  background: var(--teal-soft);
+}
+
+.data-table-action--delete {
+  color: var(--danger);
+}
+.data-table-action--delete:hover {
+  background: var(--danger-soft);
+}
+
+.data-table-mobile-card {
+  border: 1px solid var(--table-row-border);
+  border-radius: 0.75rem;
+  background: var(--card-bg);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.data-table-mobile-card:hover {
+  border-color: var(--table-border-accent);
+  box-shadow: 0 2px 12px var(--glass-shadow);
+}
+
+.data-table-mobile-card .data-table-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .table-head {
   background: var(--table-head-bg);
   color: var(--foreground);
@@ -310,14 +522,6 @@ aside.glass {
   animation: scaleIn 0.25s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.25s ease-out;
-}
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

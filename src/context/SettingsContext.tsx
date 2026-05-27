@@ -2,17 +2,21 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
-type User = {
+export type User = {
   name: string;
   email: string;
   avatar?: string;
 };
 
-type Settings = {
+export type Settings = {
   name: string;
   email: string;
   language: string;
+  timezone: string;
   notifications: boolean;
+  securityAlerts: boolean;
+  marketingEmails: boolean;
+  compactDensity: boolean;
 };
 
 type Ctx = {
@@ -25,50 +29,63 @@ type Ctx = {
   toggleTheme: () => void;
 };
 
-const defaultSettings: Settings = {
+export const defaultSettings: Settings = {
   name: '',
   email: '',
   language: 'English',
+  timezone: 'UTC',
   notifications: true,
+  securityAlerts: true,
+  marketingEmails: false,
+  compactDensity: false,
 };
+
+function loadStoredSettings(): Settings {
+  try {
+    const raw = localStorage.getItem('settings');
+    if (!raw) return defaultSettings;
+    return { ...defaultSettings, ...JSON.parse(raw) };
+  } catch {
+    return defaultSettings;
+  }
+}
 
 const SettingsContext = createContext<Ctx | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-
-  const [settings, setSettings] = useState<Settings>(() => {
-    try {
-      const raw = localStorage.getItem('settings');
-      return raw ? JSON.parse(raw) : defaultSettings;
-    } catch {
-      return defaultSettings;
-    }
-  });
-
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    try {
-      return (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
-    } catch {
-      return 'light';
-    }
-  });
-
+  const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [ready, setReady] = useState(false);
 
-  // ✅ Load current user from cookie (NO localStorage token)
+  useEffect(() => {
+    setSettings(loadStoredSettings());
+    try {
+      const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
+      if (saved === 'dark' || saved === 'light') setTheme(saved);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/me', { credentials: 'include' });
-        if (!res.ok) throw new Error('not auth');
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
         const data = await res.json();
+        const sessionUser = data?.user;
 
-        setUser(data);
+        if (!sessionUser) throw new Error('not auth');
+
+        setUser({
+          name: sessionUser.name,
+          email: sessionUser.email,
+          avatar: sessionUser.avatar,
+        });
         setSettings((s) => ({
           ...s,
-          name: data?.name ?? s.name,
-          email: data?.email ?? s.email,
+          name: sessionUser.name ?? s.name,
+          email: sessionUser.email ?? s.email,
         }));
       } catch {
         setUser(null);
@@ -78,34 +95,34 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
-  // persist settings
   useEffect(() => {
     try {
       localStorage.setItem('settings', JSON.stringify(settings));
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }, [settings]);
 
-  // persist theme + apply html class
   useEffect(() => {
     try {
       localStorage.setItem('theme', theme);
       if (theme === 'dark') document.documentElement.classList.add('dark');
       else document.documentElement.classList.remove('dark');
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }, [theme]);
 
-  const updateSettings = (s: Partial<Settings>) => {
-    setSettings((prev) => ({ ...prev, ...s }));
+  const updateSettings = (patch: Partial<Settings>) => {
+    setSettings((prev) => ({ ...prev, ...patch }));
 
-    // keep user in sync (optional)
-    setUser((prevUser) => {
-      if (!prevUser) return prevUser;
-      return {
-        ...prevUser,
-        name: s.name ?? prevUser.name,
-        email: s.email ?? prevUser.email,
-      };
-    });
+    if (patch.name !== undefined || patch.email !== undefined) {
+      setUser((prevUser) => ({
+        name: patch.name ?? prevUser?.name ?? '',
+        email: patch.email ?? prevUser?.email ?? '',
+        avatar: prevUser?.avatar,
+      }));
+    }
   };
 
   const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));

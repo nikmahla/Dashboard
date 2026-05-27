@@ -169,6 +169,9 @@ export default function UsersPage() {
         onView={(row) => setViewing(row)}
         onEdit={(row) => setEditing(row)}
         onDelete={onDeleteUser}
+        entityLabel="User"
+        deleteTitle="Delete user?"
+        deleteDescription="This user account will be permanently removed from the system."
         getDeleteLabel={(u) => `${u.name} (${u.email})`}
       />
 
@@ -202,7 +205,7 @@ export default function UsersPage() {
                 setEditing(viewing);
                 setViewing(null);
               }}
-              className="glass px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/20 transition flex items-center gap-2"
+              className="glass px-4 py-2 rounded-lg text-sm font-medium hover:bg-[color:var(--surface-hover)] transition flex items-center gap-2"
             >
               <Pencil size={16} />
               Edit User

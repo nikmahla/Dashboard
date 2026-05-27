@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { ui } from '@/lib/ui';
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -9,7 +10,7 @@ export default function LogoutButton() {
 
   return (
     <button
-      className="glass px-3 py-2 rounded-xl text-sm"
+      className={`glass px-3 py-2 ${ui.radius.md} text-sm`}
       onClick={async () => {
         await logout();
         router.push("/login");
