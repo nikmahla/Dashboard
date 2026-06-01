@@ -30,8 +30,8 @@ export function reportWebVitals(metric: {
     });
 
     // Example: Send to Analytics
-    if (window.gtag) {
-      window.gtag('event', metric.name, {
+    if ((window as any).gtag) {
+      (window as any).gtag('event', metric.name, {
         value: Math.round(metric.value),
         event_category: 'web_vitals',
         event_label: metric.id,

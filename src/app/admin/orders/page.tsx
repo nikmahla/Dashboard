@@ -38,7 +38,7 @@ export default function OrdersPage() {
     return typing || (ordersQuery.isFetching && !ordersQuery.isLoading);
   }, [query, debouncedQuery, ordersQuery.isFetching, ordersQuery.isLoading]);
 
-  const isSaving = createOrder.isLoading || updateOrder.isLoading;
+  const isSaving = createOrder.isPending || updateOrder.isPending;
 
   return (
     <div className={ui.spacing.pageY}>
