@@ -99,6 +99,6 @@ describe('KpiCard Component', () => {
     );
 
     const valueElement = screen.getByText('1,245');
-    expect(valueElement).toHaveClass('text-xl', 'font-semibold');
+    expect(valueElement).toHaveClass('text-2xl', 'font-semibold');
   });
 });
