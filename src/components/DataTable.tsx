@@ -17,7 +17,7 @@ import {
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ui, cn } from "@/lib/ui";
 
-export type Column<T> = {
+export type Column<T extends Record<string, unknown>> = {
   key: keyof T;
   label: string;
   align?: "left" | "right";
@@ -27,7 +27,7 @@ export type Column<T> = {
   sortable?: boolean;
 };
 
-type Props<T> = {
+type Props<T extends Record<string, unknown>> = {
   data: T[];
   columns: Column<T>[];
   searchableKey?: keyof T;
@@ -81,7 +81,7 @@ function RowActions<T>({
             type="button"
             onClick={() => onView(row)}
             className="data-table-action data-table-action--view"
-            aria-label="View"
+            aria-label="View row details"
           >
             <Eye size={17} />
           </button>
@@ -93,7 +93,7 @@ function RowActions<T>({
             type="button"
             onClick={() => onEdit(row)}
             className="data-table-action data-table-action--edit"
-            aria-label="Edit"
+            aria-label="Edit row"
           >
             <Pencil size={17} />
           </button>
@@ -105,7 +105,7 @@ function RowActions<T>({
             type="button"
             onClick={() => onDeleteClick(row)}
             className="data-table-action data-table-action--delete"
-            aria-label="Delete"
+            aria-label="Delete row"
           >
             <Trash size={17} />
           </button>
@@ -115,7 +115,7 @@ function RowActions<T>({
   );
 }
 
-function MobileRowCard<T extends { id?: number }>({
+function MobileRowCard<T extends Record<string, unknown> & { id?: number }>({
   row,
   rowNumber,
   columns,
@@ -197,7 +197,7 @@ function MobileRowCard<T extends { id?: number }>({
   );
 }
 
-export default function DataTable<T extends { id?: number }>({
+export default function DataTable<T extends Record<string, unknown> & { id?: number }>({
   data,
   columns,
   searchableKey,
@@ -353,7 +353,7 @@ export default function DataTable<T extends { id?: number }>({
     <div className="flex flex-wrap items-center justify-between gap-3">
       {searchableKey && (
         <SearchField
-          className="w-full max-w-sm flex-1 min-w-[200px]"
+          className="w-full max-w-xl flex-1 min-w-[220px]"
           value={effectiveQuery}
           onChange={(v) => {
             if (onQueryChange) return onQueryChange(v);
@@ -458,38 +458,55 @@ export default function DataTable<T extends { id?: number }>({
                 <thead className="sticky top-0 z-10 bg-[color:var(--table-head-bg)] backdrop-blur-sm">
                   <tr>
                     {showRowNumbers && (
-                      <th className={cn(headerAlignClass("right"), "tabular-nums")}>#</th>
+                      <th scope="col" className={cn(headerAlignClass("right"), "tabular-nums")}>#</th>
                     )}
                     {columns.map((col, colIndex) => {
                       const align =
                         columnAligns.get(String(col.key)) ??
                         getColumnAlign(col, undefined);
+                      const isSortable = !!col.sortable;
+                      const isSorted = internalSortKey === col.key;
+                      const sortSymbol = isSorted
+                        ? internalSortDir === "asc"
+                          ? "▲"
+                          : "▼"
+                        : "↕";
+                      const ariaSort = !isSortable
+                        ? "none"
+                        : isSorted
+                          ? internalSortDir === "asc"
+                            ? "ascending"
+                            : "descending"
+                          : "none";
                       return (
                         <th
                           key={String(col.key)}
+                          scope="col"
+                          aria-sort={ariaSort}
                           className={cn(
-                            headerAlignClass(align),
-                            col.sortable && "cursor-pointer select-none hover:text-[color:var(--foreground)]"
+                            headerAlignClass(align)
                           )}
-                          onClick={() => handleSortToggle(col.key, !!col.sortable)}
                         >
-                          <div
-                            className={cn(
-                              "flex items-center gap-1.5",
-                              headerFlexClass(align)
-                            )}
-                          >
-                            <span>{col.label}</span>
-                            {col.sortable && (
-                              <span className="text-[10px] opacity-60">
-                                {internalSortKey === col.key
-                                  ? internalSortDir === "asc"
-                                    ? "▲"
-                                    : "▼"
-                                  : "↕"}
+                          {isSortable ? (
+                            <button
+                              type="button"
+                              onClick={() => handleSortToggle(col.key, true)}
+                              className={cn(
+                                "group inline-flex w-full select-none items-center gap-1.5 rounded-md px-0.5 py-0.5 hover:text-[color:var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]",
+                                headerFlexClass(align)
+                              )}
+                              aria-label={`Sort by ${col.label}${isSorted ? ` (${ariaSort})` : ""}`}
+                            >
+                              <span>{col.label}</span>
+                              <span className="text-[10px] opacity-70 group-hover:opacity-100">
+                                {sortSymbol}
                               </span>
-                            )}
-                          </div>
+                            </button>
+                          ) : (
+                            <div className={cn("flex items-center gap-1.5", headerFlexClass(align))}>
+                              <span>{col.label}</span>
+                            </div>
+                          )}
                         </th>
                       );
                     })}
@@ -518,7 +535,15 @@ export default function DataTable<T extends { id?: number }>({
                     </tr>
                   ) : (
                     pageData.map((row, i) => (
-                      <tr key={row.id ?? i} className="data-table-row">
+                      <tr
+                        key={row.id ?? i}
+                        className={cn(
+                          "data-table-row",
+                          i % 2 === 0
+                            ? "bg-[color:var(--table-zebra-odd)]"
+                            : "bg-[color:var(--table-zebra-even)]"
+                        )}
+                      >
                         {showRowNumbers && (
                           <td className="tabular-nums text-right text-[color:var(--muted)] text-xs">
                             {pageStart + i + 1}
