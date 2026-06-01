@@ -7,10 +7,7 @@ type ColumnLike = {
   numeric?: boolean;
 };
 
-export function getColumnAlign<T>(
-  col: ColumnLike & { key: keyof T },
-  value: unknown
-): 'left' | 'right' {
+export function getColumnAlign(col: ColumnLike, value: unknown): 'left' | 'right' {
   if (col.align) return col.align;
   if (col.numeric) return 'right';
   if (typeof value === 'number') return 'right';
@@ -28,8 +25,8 @@ export function headerFlexClass(align: 'left' | 'right') {
 
 export type ColumnWidthKind = 'index' | 'primary' | 'text' | 'numeric' | 'actions';
 
-export function getColumnWidthKind<T>(
-  col: ColumnLike & { key: keyof T },
+export function getColumnWidthKind(
+  col: ColumnLike,
   columnIndex: number,
   align: 'left' | 'right'
 ): ColumnWidthKind {
