@@ -43,11 +43,11 @@ export default function KpiCard({
       hover
       className={cn(
         ui.spacing.cardPadding,
-        'hover:-translate-y-0.5 transition-transform duration-200'
+        'hover:-translate-y-1 transition-all duration-200'
       )}
     >
       <article aria-label={`${label}: ${value.toLocaleString()}`}>
-        <div className="flex items-start justify-between gap-4 border-b border-[color:var(--glass-border)] pb-4">
+        <div className="flex items-start justify-between gap-4 border-b border-[color:var(--border-muted)] pb-4">
           <div className="min-w-0">
             <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
               {label}
@@ -69,7 +69,7 @@ export default function KpiCard({
           </div>
         </div>
 
-        <div className="mt-4 overflow-hidden rounded-[1.75rem] bg-[color:var(--card-bg)] p-2 shadow-[inset_0_0_0_1px_rgba(139,92,246,0.08)]" aria-hidden>
+        <div className="mt-4 overflow-hidden rounded-[1.75rem] bg-[color:var(--background)] p-2 border border-[color:var(--border-muted)] shadow-[var(--shadow-xs)]" aria-hidden>
           <div className="h-14">
             <KpiChart data={chartData} color={color} />
           </div>

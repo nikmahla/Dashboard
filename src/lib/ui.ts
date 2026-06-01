@@ -32,8 +32,10 @@ export const ui = {
     caption: 'text-xs text-[color:var(--muted)]',
   },
   surface: {
-    panel: 'glass-soft border border-[color:var(--glass-border)] shadow-sm',
-    panelHover: 'transition-shadow duration-200 hover:shadow-md',
+    panel: 'rounded-2xl bg-[color:var(--card-bg)] border border-[color:var(--border-subtle)] shadow-[var(--shadow-sm)]',
+    panelHover: 'transition-all duration-200 hover:border-[color:var(--border-muted)] hover:shadow-[var(--shadow-md)]',
+    card: 'rounded-xl bg-[color:var(--card-bg)] border border-[color:var(--border-subtle)] shadow-[var(--shadow-xs)]',
+    cardElevated: 'rounded-xl bg-[color:var(--card-bg)] border border-[color:var(--border-subtle)] shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-shadow duration-200',
   },
   layout: {
     kpiGrid: 'grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4',

@@ -52,13 +52,13 @@ export default function Modal({
           className={cn(
             'relative w-full animate-scaleIn overflow-hidden bg-[color:var(--card-bg)]',
             ui.radius.lg,
-            'border border-[color:var(--glass-border)]',
-            'shadow-2xl ring-1 ring-black/5 dark:ring-white/10',
+            'border border-[color:var(--border-subtle)]',
+            'shadow-[var(--shadow-xl)] ring-1 ring-black/5 dark:ring-white/10',
             sizeClass[size]
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="border-b border-[color:var(--glass-border)] bg-[color:var(--card-bg)] px-6 py-5 sm:px-7">
+          <div className="border-b border-[color:var(--border-muted)] bg-[color:var(--card-bg)] px-6 py-5 sm:px-7">
             <div className="flex items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-3">
                 {icon && (
@@ -103,13 +103,13 @@ export default function Modal({
           </div>
 
           <div className="max-h-[min(70vh,520px)] overflow-y-auto px-6 py-6 text-sm text-[color:var(--foreground)] sm:px-7">
-            <div className="space-y-5 rounded-3xl border border-[color:var(--glass-border)] bg-[color:var(--background)] p-5">
+            <div className="space-y-5 rounded-3xl border border-[color:var(--border-muted)] bg-[color:var(--background)] p-5 shadow-[var(--shadow-xs)]">
               {children}
             </div>
           </div>
 
           {footer && (
-            <div className="border-t border-[color:var(--glass-border)] bg-[color:var(--card-bg)] px-6 py-4 sm:px-7">
+            <div className="border-t border-[color:var(--border-muted)] bg-[color:var(--card-bg)] px-6 py-4 sm:px-7">
               {footer}
             </div>
           )}

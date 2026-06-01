@@ -23,7 +23,7 @@ export default function Toast({
     return () => window.clearTimeout(timeoutId);
   }, [onClose, duration]);
 
-  const base = `px-4 py-2 ${ui.radius.md} ${ui.shadow.md} text-sm text-white`;
+  const base = `px-4 py-2 ${ui.radius.md} shadow-[var(--shadow-lg)] border border-[color:var(--border-subtle)] text-sm text-white`;
   const variant =
     type === "error"
       ? "bg-[var(--support-b)]"

@@ -50,8 +50,21 @@ body {
   /* Component Aliases */
   --background: var(--bg-default);
   --card-bg: var(--bg-muted);
-  --glass-border: var(--border-default);
-  --glass-shadow: rgba(0,0,0,0.05);
+  /* Shadows — Stripe/Linear inspired elevation system */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.15);
+  
+  /* Subtle borders */
+  --border-subtle: rgba(228, 226, 236, 0.6);
+  --border-muted: rgba(228, 226, 236, 0.4);
+  
+  /* Layered surfaces */
+  --surface-0: transparent;
+  --surface-1: rgba(255, 255, 255, 0.5);
+  --surface-2: rgba(255, 255, 255, 0.8);
 
   --foreground: var(--text-primary);
   --muted: var(--text-secondary);
@@ -168,8 +181,24 @@ body {
   /* Stronger muted token for small-uppercase headers in dark */
   --muted-strong: #9AA3B2;
 
-  /* Slightly lighter shadow for dark mode to reduce heavy contrast */
-  --glass-shadow: rgba(0,0,0,0.45);
+  --glass-border: var(--border-default);
+  --glass-shadow: rgba(0,0,0,0.6);
+  
+  /* Shadows — Stripe/Linear inspired elevation system */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.25);
+  
+  /* Subtle borders */
+  --border-subtle: rgba(42, 38, 53, 0.6);
+  --border-muted: rgba(42, 38, 53, 0.4);
+  
+  /* Layered surfaces */
+  --surface-0: transparent;
+  --surface-1: rgba(22, 19, 31, 0.5);
+  --surface-2: rgba(22, 19, 31, 0.8);
 
  
   /* Sidebar */
@@ -188,7 +217,7 @@ body {
 --------------------------------*/
 aside.glass {
   background: var(--sidebar-bg);
-  border-right: 1px solid var(--border-default);
+  border-right: 1px solid var(--border-subtle);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   box-shadow: inset -1px 0 0 rgba(255,255,255,0.04);
@@ -242,10 +271,11 @@ aside.glass {
   color: white;
   padding: 0.55rem 1rem;
   border-radius: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   font-weight: 500;
   letter-spacing: 0.2px;
   box-shadow:
-    0 4px 14px rgba(91,33,182,0.25),
+    var(--shadow-sm),
     inset 0 0 0 1px rgba(255,255,255,0.15);
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
@@ -255,7 +285,7 @@ aside.glass {
   outline-offset: 2px;
   box-shadow:
     0 0 0 4px color-mix(in srgb, var(--focus-ring) 24%, transparent),
-    0 8px 24px rgba(139,92,246,0.28),
+    var(--shadow-lg),
     inset 0 0 0 1px rgba(255,255,255,0.25);
 }
 
@@ -263,7 +293,7 @@ aside.glass {
   transform: translateY(-2px);
   filter: brightness(1.08);
   box-shadow:
-    0 8px 24px rgba(91,33,182,0.35),
+    var(--shadow-lg),
     inset 0 0 0 1px rgba(255,255,255,0.25);
 }
 
@@ -271,7 +301,7 @@ aside.glass {
   transform: translateY(0px);
   filter: brightness(0.95);
   box-shadow:
-    0 3px 10px rgba(91,33,182,0.25),
+    var(--shadow-sm),
     inset 0 0 0 1px rgba(255,255,255,0.2);
 }
 
@@ -280,8 +310,8 @@ aside.glass {
 --------------------------------*/
 .data-table-shell {
   background: var(--card-bg);
-  border: 1px solid var(--table-border-accent);
-  box-shadow: 0 2px 16px var(--glass-shadow);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
 }
 
 .data-table {
@@ -324,7 +354,7 @@ aside.glass {
 }
 
 .data-table thead {
-  border-bottom: 2px solid var(--primary);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .data-table thead th {
@@ -350,7 +380,7 @@ aside.glass {
 }
 
 .data-table tbody td {
-  border-bottom: 1px solid var(--table-row-border);
+  border-bottom: 1px solid var(--border-muted);
   border-left: none;
   border-right: none;
   padding: 0.75rem 1rem;
@@ -467,15 +497,16 @@ aside.glass {
 }
 
 .data-table-mobile-card {
-  border: 1px solid var(--table-row-border);
+  border: 1px solid var(--border-subtle);
   border-radius: 0.75rem;
   background: var(--card-bg);
+  box-shadow: var(--shadow-xs);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .data-table-mobile-card:hover {
-  border-color: var(--table-border-accent);
-  box-shadow: 0 2px 12px var(--glass-shadow);
+  border-color: var(--border-muted);
+  box-shadow: var(--shadow-sm);
 }
 
 .data-table-mobile-card .data-table-actions {
@@ -503,13 +534,14 @@ aside.glass {
 .input {
   width: 100%;
   border-radius: 0.75rem;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   background: var(--card-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: var(--foreground);
+  box-shadow: var(--shadow-xs);
   transition: border 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -521,7 +553,9 @@ aside.glass {
   border-color: var(--primary-dark);
   outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
-  box-shadow: 0 0 0 3px var(--primary-soft);
+  box-shadow: 
+    var(--shadow-sm),
+    0 0 0 3px var(--primary-soft);
 }
 
 .input[aria-invalid="true"] {
@@ -568,15 +602,30 @@ button:focus-visible,
   background: var(--background);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 20px var(--glass-shadow);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 
+    0 1px 0 var(--surface-1),
+    var(--shadow-md);
+  position: relative;
+}
+
+.glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--surface-2);
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 .glass-soft {
   background: var(--card-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  position: relative;
 }
 
 /* ------------------------------
