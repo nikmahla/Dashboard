@@ -90,6 +90,31 @@ describe('DataTable Component', () => {
     expect(screen.queryByText('User 11')).not.toBeInTheDocument();
   });
 
+  it('renders view, edit, and delete action buttons when handlers are provided', async () => {
+    const mockOnView = jest.fn();
+    const mockOnEdit = jest.fn();
+    const mockOnDelete = jest.fn();
+    const user = userEvent.setup();
+
+    render(
+      <DataTable
+        data={mockData}
+        columns={mockColumns}
+        onView={mockOnView}
+        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
+        serverSide={false}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: /view/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /edit/i }));
+    expect(mockOnEdit).toHaveBeenCalledWith(mockData[0]);
+  });
+
   it('calls onView handler when view button clicked', async () => {
     const mockOnView = jest.fn();
     const user = userEvent.setup();

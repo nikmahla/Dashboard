@@ -16,6 +16,7 @@ export default function OrdersPage() {
   const onApiError = useApiError();
 
   const [selected, setSelected] = useState<useOrders.Order | null>(null);
+  const [editing, setEditing] = useState<useOrders.Order | null>(null);
   const [adding, setAdding] = useState(false);
 
   const [page, setPage] = useState(1);
@@ -26,6 +27,7 @@ export default function OrdersPage() {
 
   const ordersQuery = useOrders.useOrders({ page, pageSize, search: debouncedQuery });
   const createOrder = useOrders.useCreateOrder({ page, pageSize, search: debouncedQuery });
+  const updateOrder = useOrders.useUpdateOrder({ page, pageSize, search: debouncedQuery });
   const deleteOrder = useOrders.useDeleteOrder({ page, pageSize, search: debouncedQuery });
 
   const orders: useOrders.Order[] = ordersQuery.data?.data ?? [];
@@ -35,6 +37,8 @@ export default function OrdersPage() {
     const typing = query !== debouncedQuery;
     return typing || (ordersQuery.isFetching && !ordersQuery.isLoading);
   }, [query, debouncedQuery, ordersQuery.isFetching, ordersQuery.isLoading]);
+
+  const isSaving = createOrder.isLoading || updateOrder.isLoading;
 
   return (
     <div className={ui.spacing.pageY}>
@@ -87,6 +91,7 @@ export default function OrdersPage() {
           return `${o.customer} · ${o.date}`;
         }}
         onView={(row) => setSelected(row)}
+        onEdit={(row) => setEditing(row)}
         onDelete={async (row) => {
           try {
             await deleteOrder.mutateAsync(row.id);
@@ -99,25 +104,41 @@ export default function OrdersPage() {
       />
 
       <Modal
-        open={adding}
-        onClose={() => setAdding(false)}
-        title="Add new order"
-        subtitle="Enter customer and order details"
+        open={adding || !!editing}
+        onClose={() => {
+          setAdding(false);
+          setEditing(null);
+        }}
+        title={editing ? "Edit order" : "Add new order"}
+        subtitle={editing ? "Update order details" : "Enter customer and order details"}
         icon={<Plus size={18} />}
       >
         <OrderForm
+          initial={editing ?? undefined}
           onSubmit={async (vals) => {
             try {
-              await createOrder.mutateAsync({
-                customer: vals.customer,
-                total: vals.total,
-                status: vals.status ?? "Pending",
-                date: vals.date,
-              });
+              if (editing) {
+                await updateOrder.mutateAsync({
+                  id: vals.id ?? editing.id,
+                  customer: vals.customer,
+                  total: vals.total,
+                  status: vals.status,
+                  date: vals.date,
+                });
+                toast.notify({ type: "success", message: "Order updated" });
+              } else {
+                await createOrder.mutateAsync({
+                  customer: vals.customer,
+                  total: vals.total,
+                  status: vals.status ?? "Pending",
+                  date: vals.date,
+                });
+                toast.notify({ type: "success", message: "Order created" });
+              }
               setAdding(false);
-              toast.notify({ type: "success", message: "Order created" });
+              setEditing(null);
             } catch (err) {
-              onApiError(err, "Could not create order");
+              onApiError(err, editing ? "Could not update order" : "Could not create order");
             }
           }}
         />
