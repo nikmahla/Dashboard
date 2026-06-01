@@ -102,6 +102,3 @@ Contributions are welcome. If you want to improve the dashboard, please:
 2. Create a feature branch.
 3. Open a pull request with a clear summary of your changes.
 
-## License
-
-MIT
