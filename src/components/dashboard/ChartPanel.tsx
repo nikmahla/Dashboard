@@ -16,11 +16,17 @@ export default function ChartPanel({
   className,
 }: ChartPanelProps) {
   return (
-    <Panel className={cn(ui.spacing.cardPadding, 'flex flex-col', className)}>
-      <div className="mb-4 shrink-0">
+    <Panel
+      className={cn(
+        ui.spacing.cardPadding,
+        'flex flex-col gap-4 overflow-hidden',
+        className
+      )}
+    >
+      <div className="mb-1 border-b border-[color:var(--glass-border)] pb-4">
         <h2 className={ui.typography.sectionTitle}>{title}</h2>
         {description && (
-          <p className={`mt-0.5 ${ui.typography.caption}`}>{description}</p>
+          <p className={`mt-2 ${ui.typography.caption}`}>{description}</p>
         )}
       </div>
       <div className={cn('flex-1 w-full min-h-0', ui.chart.height)}>{children}</div>

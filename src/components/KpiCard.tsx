@@ -47,17 +47,19 @@ export default function KpiCard({
       )}
     >
       <article aria-label={`${label}: ${value.toLocaleString()}`}>
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-4 border-b border-[color:var(--glass-border)] pb-4">
           <div className="min-w-0">
-            <p className={ui.typography.label}>{label}</p>
-            <p className={cn(ui.typography.value, palette.value)}>
+            <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
+              {label}
+            </p>
+            <p className={cn('mt-2 text-2xl font-semibold tracking-tight text-[color:var(--foreground)]', palette.value)}>
               {value.toLocaleString()}
             </p>
           </div>
 
           <div
             className={cn(
-              'flex h-10 w-10 shrink-0 items-center justify-center',
+              'flex h-11 w-11 shrink-0 items-center justify-center',
               ui.radius.md,
               palette.iconBg
             )}
@@ -67,8 +69,10 @@ export default function KpiCard({
           </div>
         </div>
 
-        <div className="mt-3 h-12" aria-hidden>
-          <KpiChart data={chartData} color={color} />
+        <div className="mt-4 overflow-hidden rounded-[1.75rem] bg-[color:var(--card-bg)] p-2 shadow-[inset_0_0_0_1px_rgba(139,92,246,0.08)]" aria-hidden>
+          <div className="h-14">
+            <KpiChart data={chartData} color={color} />
+          </div>
         </div>
       </article>
     </Panel>

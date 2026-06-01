@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import DataTable from '@/components/DataTable';
@@ -107,12 +107,42 @@ describe('DataTable Component', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: /view/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /view/i })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /edit/i })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /delete/i })).toHaveLength(2);
 
-    await user.click(screen.getByRole('button', { name: /edit/i }));
+    await user.click(screen.getAllByRole('button', { name: /edit/i })[0]);
     expect(mockOnEdit).toHaveBeenCalledWith(mockData[0]);
+  });
+
+  it('opens delete confirmation modal and confirms deletion', async () => {
+    const mockOnDelete = jest.fn();
+    const user = userEvent.setup();
+
+    render(
+      <DataTable
+        data={mockData}
+        columns={mockColumns}
+        onDelete={mockOnDelete}
+        deleteTitle="Delete user?"
+        deleteDescription="This action cannot be undone."
+        entityLabel="User"
+        getDeleteLabel={(row) => row.name as string}
+        serverSide={false}
+      />
+    );
+
+    const deleteButtons = screen.getAllByRole('button', { name: /delete row/i });
+    await user.click(deleteButtons[0]);
+
+    const modal = screen.getByRole('alertdialog');
+    expect(within(modal).getByText('Delete user?')).toBeInTheDocument();
+    expect(within(modal).getByText('This action cannot be undone.')).toBeInTheDocument();
+    expect(within(modal).getByText('User')).toBeInTheDocument();
+    expect(within(modal).getByText('John Doe')).toBeInTheDocument();
+
+    await user.click(within(modal).getByRole('button', { name: /^Delete$/i }));
+    expect(mockOnDelete).toHaveBeenCalledWith(mockData[0]);
   });
 
   it('calls onView handler when view button clicked', async () => {

@@ -15,7 +15,7 @@ import ChartPanel from '@/components/dashboard/ChartPanel';
 import { growthChartData } from '@/data/dashboard';
 import { ui } from '@/lib/ui';
 
-const legendStyle = { paddingBottom: 12, fontSize: 12 };
+const legendStyle = { paddingBottom: 12, fontSize: 12, color: 'var(--muted)' };
 
 export default function GrowthChart() {
   return (
@@ -25,9 +25,25 @@ export default function GrowthChart() {
     >
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={[...growthChartData]} margin={ui.chart.margin}>
-          <CartesianGrid strokeDasharray="3 3" stroke={ui.chart.gridStroke} />
-          <XAxis dataKey="month" tick={ui.chart.axisTick} tickLine={false} />
-          <YAxis yAxisId="left" tick={ui.chart.axisTick} tickLine={false} axisLine={false} />
+          <CartesianGrid
+            strokeDasharray="4 4"
+            stroke={ui.chart.gridStroke}
+            vertical={false}
+          />
+          <XAxis
+            dataKey="month"
+            tick={ui.chart.axisTick}
+            tickLine={false}
+            axisLine={false}
+            minTickGap={16}
+          />
+          <YAxis
+            yAxisId="left"
+            tick={ui.chart.axisTick}
+            tickLine={false}
+            axisLine={false}
+            width={32}
+          />
           <YAxis
             yAxisId="right"
             orientation="right"
@@ -35,8 +51,12 @@ export default function GrowthChart() {
             tick={ui.chart.axisTick}
             tickLine={false}
             axisLine={false}
+            width={48}
           />
-          <Tooltip content={<ChartTooltip />} />
+          <Tooltip
+            content={<ChartTooltip />}
+            cursor={{ stroke: 'var(--primary-soft)', strokeWidth: 2, fill: 'transparent' }}
+          />
           <Legend
             verticalAlign="top"
             align="left"
