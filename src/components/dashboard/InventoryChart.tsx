@@ -25,7 +25,7 @@ export default function InventoryChart() {
       description="Stock on hand vs units sold by category"
     >
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={[...inventoryChartData]} margin={ui.chart.margin} barCategoryGap="20%">
+        <BarChart data={[...inventoryChartData]} margin={{ top: 22, right: 24, left: 0, bottom: 18 }} barCategoryGap="22%">
           <CartesianGrid
             strokeDasharray="4 4"
             stroke={ui.chart.gridStroke}
@@ -37,12 +37,13 @@ export default function InventoryChart() {
             tickLine={false}
             axisLine={false}
             minTickGap={10}
+            padding={{ left: 12, right: 12 }}
           />
           <YAxis
             tick={ui.chart.axisTick}
             tickLine={false}
             axisLine={false}
-            width={32}
+            width={34}
           />
           <Tooltip
             content={<ChartTooltip />}

@@ -2,6 +2,8 @@
  * @jest-environment node
  */
 
+import type { NextResponse } from 'next/server';
+
 jest.mock('@/lib/jwt', () => ({
   signToken: jest.fn(async (payload: any) => `token-${payload.sub}`),
   verifyToken: jest.fn(async (token: string) => {
@@ -12,8 +14,8 @@ jest.mock('@/lib/jwt', () => ({
   }),
 }));
 
-let loginPOST: (request: Request) => Promise<Response>;
-let meGET: (request: Request) => Promise<Response>;
+let loginPOST: (request: Request) => Promise<NextResponse>;
+let meGET: (request: Request) => Promise<NextResponse>;
 
 beforeAll(async () => {
   const loginModule = await import('@/app/api/auth/login/route');

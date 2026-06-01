@@ -24,7 +24,7 @@ export default function GrowthChart() {
       description="Orders, customers, and revenue over the last 6 months"
     >
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={[...growthChartData]} margin={ui.chart.margin}>
+        <LineChart data={[...growthChartData]} margin={{ top: 22, right: 24, left: 0, bottom: 18 }}>
           <CartesianGrid
             strokeDasharray="4 4"
             stroke={ui.chart.gridStroke}
@@ -36,13 +36,14 @@ export default function GrowthChart() {
             tickLine={false}
             axisLine={false}
             minTickGap={16}
+            padding={{ left: 12, right: 12 }}
           />
           <YAxis
             yAxisId="left"
             tick={ui.chart.axisTick}
             tickLine={false}
             axisLine={false}
-            width={32}
+            width={34}
           />
           <YAxis
             yAxisId="right"
