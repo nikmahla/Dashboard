@@ -1,0 +1,124 @@
+# Admin Dashboard
+
+A modern admin dashboard built with Next.js, React, Tailwind CSS, and Recharts. It includes authenticated admin routes, server API endpoints, interactive tables, charts, optimistic UI updates, and a refined dashboard experience.
+
+[![CI](https://github.com/nikmahla/Dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/nikmahla/Dashboard/actions/workflows/ci.yml)
+
+GitHub: https://github.com/nikmahla/Dashboard
+
+## Live Demo
+
+<!-- TODO: replace with the stable production URL from Vercel (Project -> Domains), not a per-deployment URL -->
+https://YOUR-PROJECT.vercel.app
+
+### Demo accounts
+
+| Role   | Email             | Password |
+| ------ | ----------------- | -------- |
+| Admin  | admin@test.com    | 1234     |
+| Viewer | viewer@test.com   | 1234     |
+
+> These are demo-only accounts. Data is mock data served from API routes; there is no real database yet.
+
+## Features
+
+- Next.js 16 App Router with server and client components
+- React 19.2.1 and Tailwind CSS v4
+- Recharts-based KPI and inventory charts
+- React Query for data fetching, caching, and optimistic updates
+- API routes for auth, customers, inventory, orders, products, tasks, and users
+- Authentication flows with login, logout, and protected admin pages
+- Accessible modal dialogs, forms, tables, and dashboard components
+- Jest + Testing Library test coverage for key components and auth routes
+
+## Tech Stack
+
+- Next.js 16.0.10
+- React 19.2.1
+- Tailwind CSS v4
+- Recharts
+- @tanstack/react-query
+- Jest + Testing Library
+- Vercel deployment
+
+## Getting Started
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a local environment file (see `.env.example`):
+
+```bash
+cp .env.example .env.local
+# then set JWT_SECRET, e.g. the output of: openssl rand -base64 32
+```
+
+Outside production a local-only fallback secret is used if `JWT_SECRET` is missing. In production the app refuses to sign or verify tokens without it.
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Create production build
+- `npm run start` - Start production server after build
+- `npm run lint` - Run ESLint
+- `npm test` - Run Jest tests
+- `npm test -- --runInBand <file>` - Run specific test files
+
+## Testing
+
+Run all tests:
+
+```bash
+npm test
+```
+
+Run targeted tests:
+
+```bash
+npm test -- --runInBand src/components/__tests__/KpiCard.test.tsx
+```
+
+## Deployment
+
+Recommended deployment platform: Vercel.
+
+### Deploy on Vercel
+
+1. Connect the GitHub repository to Vercel.
+2. Set the framework to **Next.js**.
+3. Use:
+   - Build command: `npm run build`
+   - Output directory: `.next`
+4. Add the environment variable `JWT_SECRET` (Project -> Settings -> Environment Variables).
+5. Deploy.
+
+### Local production build
+
+```bash
+npm run build
+```
+
+## Notes
+
+- If dependency installation fails due to peer conflicts, the repository includes a `.npmrc` setting for `legacy-peer-deps=true`.
+- The `/admin` routes require an authenticated session: they are protected on the server by `src/middleware.ts` (JWT in an httpOnly cookie) and again on the client by `AuthGuard`.
+
+## Contributing
+
+Contributions are welcome. If you want to improve the dashboard, please:
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Open a pull request with a clear summary of your changes.
+

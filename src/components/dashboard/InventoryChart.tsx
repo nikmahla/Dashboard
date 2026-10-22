@@ -1,0 +1,77 @@
+'use client';
+
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid,
+  ResponsiveContainer,
+} from 'recharts';
+import ChartTooltip from '@/components/ChartTooltip';
+import ChartPanel from '@/components/dashboard/ChartPanel';
+import { inventoryChartData } from '@/data/dashboard';
+import { ui } from '@/lib/ui';
+
+const legendStyle = { paddingBottom: 12, fontSize: 12, color: 'var(--muted)' };
+const barRadius: [number, number, number, number] = [6, 6, 0, 0];
+
+export default function InventoryChart() {
+  return (
+    <ChartPanel
+      title="Inventory overview"
+      description="Stock on hand vs units sold by category"
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={[...inventoryChartData]} margin={{ top: 22, right: 24, left: 0, bottom: 18 }} barCategoryGap="22%">
+          <CartesianGrid
+            strokeDasharray="4 4"
+            stroke={ui.chart.gridStroke}
+            vertical={false}
+          />
+          <XAxis
+            dataKey="name"
+            tick={ui.chart.axisTick}
+            tickLine={false}
+            axisLine={false}
+            minTickGap={10}
+            padding={{ left: 12, right: 12 }}
+          />
+          <YAxis
+            tick={ui.chart.axisTick}
+            tickLine={false}
+            axisLine={false}
+            width={34}
+          />
+          <Tooltip
+            content={<ChartTooltip />}
+            cursor={{ fill: 'var(--primary-soft)', opacity: 0.28 }}
+          />
+          <Legend
+            verticalAlign="top"
+            align="left"
+            iconType="circle"
+            iconSize={8}
+            wrapperStyle={legendStyle}
+          />
+          <Bar
+            name="In stock"
+            dataKey="stock"
+            fill="var(--primary)"
+            radius={barRadius}
+            barSize={16}
+          />
+          <Bar
+            name="Sold"
+            dataKey="sold"
+            fill="var(--teal)"
+            radius={barRadius}
+            barSize={16}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartPanel>
+  );
+}
