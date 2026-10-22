@@ -2,15 +2,14 @@
 
 A modern admin dashboard built with Next.js, React, Tailwind CSS, and Recharts. It includes authenticated admin routes, server API endpoints, interactive tables, charts, optimistic UI updates, and a refined dashboard experience.
 
-[![CI](https://dashboard-17tl.vercel.app/login)](https://github.com/nikmahla/Dashboard/actions/workflows/ci.yml)
+
 
 GitHub: https://github.com/nikmahla/Dashboard
 
 ## Live Demo
 
 <!-- TODO: replace with the stable production URL from Vercel (Project -> Domains), not a per-deployment URL -->
-https://YOUR-PROJECT.vercel.app
-
+https://dashboard-17tl.vercel.app/login
 ### Demo accounts
 
 | Role   | Email             | Password |
