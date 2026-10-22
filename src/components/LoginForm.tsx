@@ -94,16 +94,21 @@ export default function LoginForm() {
       });
 
       if (!res.ok) {
-        const txt = await res.text().catch(() => '');
-        throw new Error(txt || 'Login failed');
+        throw new Error(res.status >= 500 ? 'server' : 'invalid');
       }
 
       toast.notify({ type: 'success', message: 'Logged in successfully' });
       router.replace('/admin');
       router.refresh();
       await refresh();
-    } catch {
-      toast.notify({ type: 'error', message: 'Invalid email or password' });
+    } catch (err) {
+      const isServerError = err instanceof Error && err.message === 'server';
+      toast.notify({
+        type: 'error',
+        message: isServerError
+          ? 'Server error. Please try again later.'
+          : 'Invalid email or password',
+      });
     } finally {
       setLoading(false);
     }
