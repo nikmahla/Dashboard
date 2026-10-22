@@ -2,7 +2,7 @@
 
 A modern admin dashboard built with Next.js, React, Tailwind CSS, and Recharts. It includes authenticated admin routes, server API endpoints, interactive tables, charts, optimistic UI updates, and a refined dashboard experience.
 
-[![CI](https://github.com/nikmahla/Dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/nikmahla/Dashboard/actions/workflows/ci.yml)
+[![CI](https://dashboard-17tl.vercel.app/login)](https://github.com/nikmahla/Dashboard/actions/workflows/ci.yml)
 
 GitHub: https://github.com/nikmahla/Dashboard
 
