@@ -3,6 +3,20 @@
 /* ------------------------------
    GLOBAL RESET
 --------------------------------*/
+
+/* Tailwind v4 defaults border-color to currentColor (black in light mode,
+   white in dark mode). Restore a theme-aware default so a bare `border`
+   utility renders as a subtle divider instead of a hard outline. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--border-default);
+  }
+}
+
 html, body, #__next {
   height: 100%;
   margin: 0;
@@ -29,6 +43,8 @@ body {
   --bg-default: #F6F5FA;      /* soft lavender-gray */
   --bg-muted: #FFFFFF;        /* card */
   --border-default: #E4E2EC;  /* cool border */
+  --glass-border: var(--border-default);
+  --glass-shadow: rgba(15, 23, 42, 0.12);
   --focus-ring: #7C3AED;
 
   /* Text */
@@ -267,7 +283,9 @@ aside.glass {
    BUTTONS — 2025 GRADIENT STYLE
 --------------------------------*/
 .btn-primary {
-  background-image: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-2-dark) 100%);
+  /* Fixed stops: --primary-dark flips to a pale lavender in dark mode,
+     which made the white label unreadable. */
+  background-image: linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%);
   color: white;
   padding: 0.55rem 1rem;
   border-radius: 0.65rem;
@@ -714,4 +732,20 @@ button:focus-visible,
 
 .icon-btn {
   color: var(--foreground);
+}
+
+
+/* ------------------------------
+   TOPBAR — fixed, divider only at the bottom
+   (.glass sets position: relative and a full border; this wins by order)
+--------------------------------*/
+header.glass {
+  position: fixed;
+  border-width: 0 0 1px 0;
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-xs);
+}
+
+header.glass::after {
+  display: none;
 }
