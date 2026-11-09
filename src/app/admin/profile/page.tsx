@@ -256,43 +256,42 @@ export default function ProfilePage() {
         icon={<Pencil size={18} />}
       >
         <form
-          className={ui.spacing.stackMd}
+          className="form-stack"
           onSubmit={(e) => {
             e.preventDefault();
             void handleSave();
           }}
         >
-          <label className="block">
-            <span className={ui.typography.label}>Name</span>
+          <label className="field">
+            <span className="field-label">Name</span>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className={cn('input mt-1.5')}
+              className="input"
               placeholder="Your name"
             />
           </label>
-          <label className="block">
-            <span className={ui.typography.label}>Email</span>
+          <label className="field">
+            <span className="field-label">Email</span>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className={cn('input mt-1.5')}
+              className="input"
               placeholder="you@example.com"
             />
           </label>
 
-          <div className="flex flex-col-reverse gap-2 border-t border-[color:var(--glass-border)] pt-4 sm:flex-row sm:justify-end">
+          <div className="form-actions flex-col-reverse sm:flex-row">
             <button
               type="button"
               disabled={saving}
               onClick={() => setEditing(false)}
               className={cn(
                 btnBase,
-                'border border-[color:var(--glass-border)] bg-[color:var(--card-bg)] text-[color:var(--foreground)]',
-                'hover:bg-[var(--primary-soft)] focus-visible:ring-[color:var(--primary)] disabled:opacity-50'
+                'btn-secondary disabled:opacity-50'
               )}
             >
               Cancel

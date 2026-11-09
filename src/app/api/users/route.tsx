@@ -1,60 +1,22 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/requireAuth";
+import { createCrudHandlers } from "@/lib/crud";
+import { usersRepo } from "@/lib/data";
+import { ADMIN_ONLY, READ, requireAuth } from "@/lib/requireAuth";
+import { userCreate, userUpdate } from "@/lib/validation";
 
-let users = [
-  { id: 1, name: "Alice Johnson", email: "alice@example.com", role: "Admin" },
-  { id: 2, name: "Bob Smith", email: "bob@example.com", role: "Editor" },
-  { id: 3, name: "Charlie Brown", email: "charlie@example.com", role: "Viewer" },
-  { id: 4, name: "David Lee", email: "david@example.com", role: "Viewer" },
-  { id: 5, name: "Emily Davis", email: "emily@example.com", role: "Editor" },
-];
+// Only Admins may create/change/delete users (a Viewer must not be able to make themselves Admin).
+const crud = createCrudHandlers({
+  repo: usersRepo,
+  createSchema: userCreate,
+  updateSchema: userUpdate,
+  writeRoles: ADMIN_ONLY,
+});
 
+export const { POST, PUT, DELETE } = crud;
+
+// The UI expects a plain array here.
 export async function GET(req: Request) {
-  const auth = await requireAuth(req);
+  const auth = await requireAuth(req, { roles: READ });
   if (!auth.ok) return auth.res;
-
-  return NextResponse.json(users);
-}
-
-export async function POST(req: Request) {
-  const auth = await requireAuth(req);
-  if (!auth.ok) return auth.res;
-
-  const body = await req.json();
-
-  const newUser = {
-    id: Date.now(),
-    name: body.name,
-    email: body.email,
-    role: body.role ?? "Viewer",
-  };
-
-  users.unshift(newUser);
-  return NextResponse.json(newUser, { status: 201 });
-}
-
-export async function PUT(req: Request) {
-  const auth = await requireAuth(req);
-  if (!auth.ok) return auth.res;
-
-  const body = await req.json();
-  const id = Number(body.id);
-
-  const idx = users.findIndex((u) => u.id === id);
-  if (idx === -1) return NextResponse.json({ message: "Not found" }, { status: 404 });
-
-  users[idx] = { ...users[idx], ...body };
-  return NextResponse.json(users[idx]);
-}
-
-export async function DELETE(req: Request) {
-  const auth = await requireAuth(req);
-  if (!auth.ok) return auth.res;
-
-  const { searchParams } = new URL(req.url);
-  const id = Number(searchParams.get("id"));
-  if (!id) return NextResponse.json({ message: "Missing id" }, { status: 400 });
-
-  users = users.filter((u) => u.id !== id);
-  return NextResponse.json({ success: true });
+  return NextResponse.json(await usersRepo.all());
 }

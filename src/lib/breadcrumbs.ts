@@ -1,6 +1,7 @@
 /** Route segment → display label for breadcrumbs */
 export const BREADCRUMB_LABELS: Record<string, string> = {
   products: 'Products',
+  inventory: 'Inventory',
   orders: 'Orders',
   customers: 'Customers',
   users: 'Users',

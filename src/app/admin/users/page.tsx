@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/context/AuthContext";
 import { useMemo, useState, useEffect } from "react";
 import DataTable from "@/components/DataTable";
 import Modal from "@/components/Modal";
@@ -36,33 +37,33 @@ function UserForm({
   const canSubmit = name.trim().length > 0 && email.trim().length > 0;
 
   return (
-    <div className="space-y-4">
-      <div>
-        <p className="text-xs text-[color:var(--muted)]">Name</p>
+    <div className="form-stack">
+      <div className="field">
+        <p className="field-label">Name</p>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="mt-1 w-full rounded-xl p-2 bg-transparent border border-[color:var(--glass-border)] text-[color:var(--foreground)] outline-none"
+          className="input"
           placeholder="e.g. Sara Connor"
         />
       </div>
 
-      <div>
-        <p className="text-xs text-[color:var(--muted)]">Email</p>
+      <div className="field">
+        <p className="field-label">Email</p>
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 w-full rounded-xl p-2 bg-transparent border border-[color:var(--glass-border)] text-[color:var(--foreground)] outline-none"
+          className="input"
           placeholder="e.g. sara@example.com"
         />
       </div>
 
-      <div>
-        <p className="text-xs text-[color:var(--muted)]">Role</p>
+      <div className="field">
+        <p className="field-label">Role</p>
         <select
           value={role}
           onChange={(e) => setRole(e.target.value as Role)}
-          className="mt-1 w-full rounded-xl p-2 bg-transparent border border-[color:var(--glass-border)] text-[color:var(--foreground)] outline-none"
+          className="input"
         >
           <option value="Viewer">Viewer</option>
           <option value="Editor">Editor</option>
@@ -70,7 +71,7 @@ function UserForm({
         </select>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="form-actions">
         <button
           onClick={() =>
             onSubmit({
@@ -81,7 +82,7 @@ function UserForm({
             })
           }
           disabled={!canSubmit || submitting}
-          className="btn-primary px-4 py-2 rounded-xl disabled:opacity-60 disabled:cursor-not-allowed"
+          className="btn-primary px-5 py-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {submitting ? "Saving..." : "Save"}
         </button>
@@ -92,14 +93,15 @@ function UserForm({
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <p className="text-xs text-[color:var(--muted)]">{label}</p>
-      <p className="text-sm font-medium text-[color:var(--foreground)]">{value}</p>
+    <div className="detail-row">
+      <p className="dt">{label}</p>
+      <p className="dd">{value}</p>
     </div>
   );
 }
 
 export default function UsersPage() {
+  const { isAdmin } = useAuth();
   const toast = useToast();
 
   const usersQuery = useUsers();
@@ -118,7 +120,7 @@ export default function UsersPage() {
     () => [
       { key: "name" as const, label: "Name" },
       { key: "email" as const, label: "Email" },
-      { key: "role" as const, label: "Role" },
+      { key: "role" as const, label: "Role", render: (r: User) => <span className="badge badge-neutral">{r.role}</span> },
     ],
     []
   );
@@ -165,10 +167,10 @@ export default function UsersPage() {
         searchableKey="name"
         serverSide={false}
         loading={loading || deleteUser.isPending}
-        onCreate={() => setAdding(true)}
+        onCreate={isAdmin ? () => setAdding(true) : undefined}
         onView={(row) => setViewing(row)}
-        onEdit={(row) => setEditing(row)}
-        onDelete={onDeleteUser}
+        onEdit={isAdmin ? (row) => setEditing(row) : undefined}
+        onDelete={isAdmin ? onDeleteUser : undefined}
         entityLabel="User"
         deleteTitle="Delete user?"
         deleteDescription="This user account will be permanently removed from the system."
@@ -195,21 +197,25 @@ export default function UsersPage() {
         icon={<UserIcon size={18} />}
       >
         {viewing && (
-          <div className="space-y-4">
-            <Detail label="Name" value={viewing.name} />
-            <Detail label="Email" value={viewing.email} />
-            <Detail label="Role" value={viewing.role} />
+          <div>
+            <div className="detail-list">
+              <Detail label="Name" value={viewing.name} />
+              <Detail label="Email" value={viewing.email} />
+              <Detail label="Role" value={viewing.role} />
+            </div>
 
+            {isAdmin && (
             <button
               onClick={() => {
                 setEditing(viewing);
                 setViewing(null);
               }}
-              className="glass px-4 py-2 rounded-lg text-sm font-medium hover:bg-[color:var(--surface-hover)] transition flex items-center gap-2"
+              className="btn-secondary mt-5"
             >
               <Pencil size={16} />
               Edit User
             </button>
+            )}
           </div>
         )}
       </Modal>

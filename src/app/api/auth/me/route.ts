@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
+import { getCookie } from "@/lib/auth-cookie";
 
 export async function GET(req: Request) {
-  const token = req.headers.get("cookie")?.match(/token=([^;]+)/)?.[1];
-
+  const token = getCookie(req, "token");
   if (!token) return NextResponse.json({ user: null }, { status: 200 });
 
   try {

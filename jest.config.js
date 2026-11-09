@@ -29,4 +29,12 @@ const customJestConfig = {
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-module.exports = createJestConfig(customJestConfig)
+// jose is ESM-only: let Jest transform it (next/jest ignores node_modules by default).
+module.exports = async () => {
+  const config = await createJestConfig(customJestConfig)()
+  config.transformIgnorePatterns = [
+    '/node_modules/(?!(jose)/)',
+    '^.+\\.module\\.(css|sass|scss)$',
+  ]
+  return config
+}

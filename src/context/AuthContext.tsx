@@ -12,6 +12,9 @@ type AuthUser = null | {
 type AuthCtx = {
   user: AuthUser;
   loading: boolean;
+  /** Admin and Editor may create/edit/delete. Viewer is read-only. (The server enforces this too.) */
+  canWrite: boolean;
+  isAdmin: boolean;
   refresh: () => Promise<void>;
   updateProfile: (data: { name: string; email: string }) => Promise<void>;
   logout: () => Promise<void>;
@@ -71,7 +74,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <Ctx.Provider value={{ user, loading, refresh, updateProfile, logout }}>
+    <Ctx.Provider
+      value={{
+        user,
+        loading,
+        canWrite: user?.role === "Admin" || user?.role === "Editor",
+        isAdmin: user?.role === "Admin",
+        refresh,
+        updateProfile,
+        logout,
+      }}
+    >
       {children}
     </Ctx.Provider>
   );

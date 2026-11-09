@@ -1,30 +1,27 @@
 import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import { signToken } from "@/lib/jwt";
+import { parseBody } from "@/lib/api-utils";
+import { loginSchema } from "@/lib/validation";
+import { authUsers, DUMMY_HASH } from "@/lib/data/auth-users";
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  const email = String(body.email ?? "").trim().toLowerCase();
-  const password = String(body.password ?? "");
+  const body = await parseBody(req, loginSchema);
+  if (!body.ok) return body.res;
+  const { email, password } = body.data;
 
-  const users = [
-    { id: 1, name: "Admin", email: "admin@test.com", password: "1234", role: "Admin" },
-    { id: 2, name: "Viewer", email: "viewer@test.com", password: "1234", role: "Viewer" },
-  ];
+  const user = authUsers.find((u) => u.email === email);
+  // Always run bcrypt so "unknown email" and "wrong password" take about the same time.
+  const valid = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_HASH);
+  if (!user || !valid) {
+    return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+  }
 
-  const user = users.find((u) => u.email === email && u.password === password);
-  if (!user) return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
-
-  const token = await signToken({
-    sub: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-  });
+  const token = await signToken({ sub: user.id, name: user.name, email: user.email, role: user.role });
 
   const res = NextResponse.json({
     user: { id: user.id, name: user.name, email: user.email, role: user.role },
   });
-
   res.cookies.set("token", token, {
     httpOnly: true,
     sameSite: "lax",
@@ -32,6 +29,5 @@ export async function POST(req: Request) {
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
   });
-
   return res;
 }

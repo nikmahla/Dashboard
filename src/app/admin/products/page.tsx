@@ -1,5 +1,8 @@
 "use client";
 
+import StatusBadge from "@/components/ui/StatusBadge";
+import { money } from "@/lib/format";
+import { useAuth } from "@/context/AuthContext";
 import { useMemo, useState } from "react";
 import { Package, Plus, Pencil } from "lucide-react";
 import DataTable from "@/components/DataTable";
@@ -21,6 +24,7 @@ export default function ProductsPage() {
   const toast = useToast();
   const onApiError = useApiError();
 
+  const { canWrite } = useAuth();
   const [editing, setEditing] = useState<Product | null>(null);
   const [viewing, setViewing] = useState<Product | null>(null);
   const [creating, setCreating] = useState(false);
@@ -46,9 +50,9 @@ export default function ProductsPage() {
         key: "price" as const,
         label: "Price",
         numeric: true,
-        render: (r: Product) => `$${r.price}`,
+        render: (r: Product) => money(r.price),
       },
-      { key: "status" as const, label: "Status" },
+      { key: "status" as const, label: "Status", render: (r: Product) => <StatusBadge status={r.status} /> },
     ],
     []
   );
@@ -125,9 +129,9 @@ export default function ProductsPage() {
         deleteDescription="This product will be permanently removed from your catalog."
         getDeleteLabel={(r) => (r as Product).name}
         onView={(r) => setViewing(r)}
-        onEdit={(r) => setEditing(r)}
-        onDelete={(r) => onDelete(r as Product)}
-        onCreate={() => setCreating(true)}
+        onEdit={canWrite ? (r) => setEditing(r) : undefined}
+        onDelete={canWrite ? (r) => onDelete(r as Product) : undefined}
+        onCreate={canWrite ? () => setCreating(true) : undefined}
       />
 
       <Modal
@@ -158,7 +162,7 @@ export default function ProductsPage() {
         icon={<Package size={18} />}
       >
         {viewing && (
-          <dl className="space-y-4">
+          <dl className="detail-list">
             <DetailField label="Name" value={viewing.name} />
             <DetailField label="Price" value={`$${viewing.price}`} />
             <DetailField label="Status" value={viewing.status} />
@@ -171,9 +175,9 @@ export default function ProductsPage() {
 
 function DetailField({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <dt className={ui.typography.caption}>{label}</dt>
-      <dd className="mt-0.5 text-sm font-medium text-[color:var(--foreground)]">{value}</dd>
+    <div className="detail-row">
+      <dt>{label}</dt>
+      <dd>{value}</dd>
     </div>
   );
 }

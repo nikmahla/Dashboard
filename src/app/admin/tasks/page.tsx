@@ -1,5 +1,7 @@
 "use client";
 
+import { shortDate } from "@/lib/format";
+import { useAuth } from "@/context/AuthContext";
 import { useMemo, useState } from "react";
 import {
   Plus,
@@ -31,6 +33,7 @@ import {
 export default function TasksPage() {
   const { notify } = useToast();
   const onApiError = useApiError();
+  const { canWrite } = useAuth();
 
   // React Query
   const tasksQuery = useTasks();
@@ -150,7 +153,7 @@ export default function TasksPage() {
     });
   }, [tasks, debouncedSearch, priorityFilter, prioritySort]);
 
-  const formatDate = (iso: string) => new Date(iso).toLocaleDateString();
+  const formatDate = (iso: string) => shortDate(iso.slice(0, 10));
 
   // -----------------------------
   // UI
@@ -171,8 +174,8 @@ export default function TasksPage() {
         />
       </div>
 
-      {/* Add Task */}
-      <div className="flex gap-2">
+      {/* Add Task (hidden for read-only users) */}
+      {canWrite && <div className="flex gap-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -197,7 +200,7 @@ export default function TasksPage() {
         >
           {createTask.isPending ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
         </button>
-      </div>
+      </div>}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -262,7 +265,7 @@ export default function TasksPage() {
                 <div className="flex items-start gap-3">
                   <button
                     onClick={() => toggleTask(task)}
-                    disabled={isMutating}
+                    disabled={isMutating || !canWrite}
                     className={`
                       mt-0.5 transition-all
                       ${task.completed ? "text-[color:var(--primary)] scale-110" : "text-[color:var(--muted)]"}
@@ -330,7 +333,7 @@ export default function TasksPage() {
                       <select
                         value={task.priority}
                         onChange={(e) => changePriority(task, e.target.value as Priority)}
-                        disabled={isMutating}
+                        disabled={isMutating || !canWrite}
                         className="
                           text-xs bg-transparent border border-[color:var(--glass-border)]
                           rounded-lg px-2 py-0.5 text-[color:var(--foreground)]
@@ -352,8 +355,8 @@ export default function TasksPage() {
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-2 justify-end">
+                {/* Actions (hidden for read-only users) */}
+                {canWrite && <div className="flex items-center gap-2 justify-end">
                   {isEditing ? (
                     <>
                       <Tooltip label="Save" side="top">
@@ -423,7 +426,7 @@ export default function TasksPage() {
                       <Trash2 size={18} />
                     </button>
                   </Tooltip>
-                </div>
+                </div>}
               </div>
             );
           })

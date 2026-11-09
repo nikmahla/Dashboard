@@ -21,11 +21,11 @@ export default function KpiChart({ data = [], color = 'purple' }: KpiChartProps)
   if (chartData.length === 0) return null;
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={chartData} margin={{ top: 6, right: 0, left: 0, bottom: 6 }}>
+    <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 96, height: 36 }}>
+      <AreaChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 2 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={strokeColor} stopOpacity={0.36} />
+            <stop offset="0%" stopColor={strokeColor} stopOpacity={0.18} />
             <stop offset="100%" stopColor={strokeColor} stopOpacity={0} />
           </linearGradient>
         </defs>
@@ -33,12 +33,10 @@ export default function KpiChart({ data = [], color = 'purple' }: KpiChartProps)
           type="monotone"
           dataKey="v"
           stroke={strokeColor}
-          strokeWidth={2.5}
+          strokeWidth={1.75}
           fill={`url(#${gradientId})`}
           dot={false}
-          activeDot={{ r: 4, fill: strokeColor, strokeWidth: 0 }}
-          isAnimationActive
-          animationDuration={500}
+          isAnimationActive={false}
         />
       </AreaChart>
     </ResponsiveContainer>

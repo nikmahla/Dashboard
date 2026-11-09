@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import DataTable from "@/components/DataTable";
 import Modal from "@/components/Modal";
@@ -21,6 +22,7 @@ export default function CustomersPage() {
   const onApiError = useApiError();
 
   const [viewing, setViewing] = useState<Customer | null>(null);
+  const { canWrite } = useAuth();
   const [editing, setEditing] = useState<Customer | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -114,9 +116,9 @@ const refreshing = customersQuery.isFetching && !customersQuery.isLoading;
           { key: "orders", label: "Orders", numeric: true },
         ]}
         onView={(row) => setViewing(row)}
-        onEdit={(row) => setEditing(row)}
-        onDelete={(row) => handleDelete(row)}
-        onCreate={() => setCreating(true)}
+        onEdit={canWrite ? (row) => setEditing(row) : undefined}
+        onDelete={canWrite ? (row) => handleDelete(row) : undefined}
+        onCreate={canWrite ? () => setCreating(true) : undefined}
         entityLabel="Customer"
         deleteTitle="Delete customer?"
         deleteDescription="This customer record will be permanently removed."
@@ -125,19 +127,10 @@ const refreshing = customersQuery.isFetching && !customersQuery.isLoading;
 
       <Modal open={!!viewing} onClose={() => setViewing(null)} title="Customer Details">
         {viewing && (
-          <div className="space-y-3">
-            <div>
-              <p className="text-xs text-slate-400">Name</p>
-              <p className="font-medium">{viewing.name}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Email</p>
-              <p className="font-medium">{viewing.email}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Orders</p>
-              <p className="font-medium">{viewing.orders}</p>
-            </div>
+          <div className="detail-list">
+            <div className="detail-row"><p className="dt">Name</p><p className="dd">{viewing.name}</p></div>
+            <div className="detail-row"><p className="dt">Email</p><p className="dd">{viewing.email}</p></div>
+            <div className="detail-row"><p className="dt">Orders</p><p className="dd">{viewing.orders}</p></div>
           </div>
         )}
       </Modal>

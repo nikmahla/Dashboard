@@ -27,7 +27,11 @@ type Ctx = {
   theme: 'light' | 'dark';
   setTheme: (t: 'light' | 'dark') => void;
   toggleTheme: () => void;
+  accent: Accent;
+  toggleAccent: () => void;
 };
+
+export type Accent = 'petrol' | 'amber';
 
 export const defaultSettings: Settings = {
   name: '',
@@ -56,6 +60,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [accent, setAccent] = useState<Accent>('petrol');
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -63,6 +68,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
       if (saved === 'dark' || saved === 'light') setTheme(saved);
+      if (localStorage.getItem('accent') === 'amber') setAccent('amber');
     } catch {
       /* ignore */
     }
@@ -113,6 +119,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [theme]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('accent', accent);
+    } catch {
+      /* ignore */
+    }
+    if (accent === 'amber') document.documentElement.setAttribute('data-accent', 'amber');
+    else document.documentElement.removeAttribute('data-accent');
+  }, [accent]);
+
   const updateSettings = (patch: Partial<Settings>) => {
     setSettings((prev) => ({ ...prev, ...patch }));
 
@@ -126,12 +142,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
+  const toggleAccent = () => setAccent((a) => (a === 'petrol' ? 'amber' : 'petrol'));
 
   if (!ready) return null;
 
   return (
     <SettingsContext.Provider
-      value={{ user, setUser, settings, updateSettings, theme, setTheme, toggleTheme }}
+      value={{ user, setUser, settings, updateSettings, theme, setTheme, toggleTheme, accent, toggleAccent }}
     >
       {children}
     </SettingsContext.Provider>

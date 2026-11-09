@@ -224,7 +224,7 @@ export default function DataTable<T extends Record<string, unknown> & { id?: num
   entityLabel = "Item",
   deleteTitle = "Delete item?",
   deleteDescription = "This action cannot be undone. The item will be permanently removed.",
-  showRowNumbers = true,
+  showRowNumbers = false,
 }: Props<T>) {
   const [internalQuery, setInternalQuery] = useState("");
   const [deleteRow, setDeleteRow] = useState<T | null>(null);
@@ -364,7 +364,7 @@ export default function DataTable<T extends Record<string, unknown> & { id?: num
       )}
       {onCreate && (
         <button type="button" onClick={onCreate} className="btn-primary ml-auto px-4 py-2 text-sm font-medium shrink-0">
-          New
+          {entityLabel ? `Add ${entityLabel.toLowerCase()}` : 'Add new'}
         </button>
       )}
     </div>
@@ -378,7 +378,7 @@ export default function DataTable<T extends Record<string, unknown> & { id?: num
         className={cn(ui.table.shell, containerClassName)}
         style={{
           ...(containerStyle ?? {}),
-          ...(height ? { height } : { height: "60vh" }),
+          ...(height ? { height } : {}),
         }}
       >
         <ConfirmModal

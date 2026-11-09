@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { ui, cn } from '@/lib/ui';
 
 export default function OrderForm({
   initial,
@@ -30,83 +29,41 @@ export default function OrderForm({
   );
 
   return (
-    <div className="space-y-5">
-
-      {/* Customer */}
-      <label className="block">
-        <span className="text-sm font-medium text-[color:var(--muted)]">
-          Customer
-        </span>
-        <input
-          value={customer}
-          onChange={(e) => setCustomer(e.target.value)}
-          className={cn('input mt-1 w-full', ui.radius.md, ui.shadow.sm)}
-        />
+    <form
+      className="form-stack"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit({ id: initial?.id, customer: customer.trim(), total, status, date });
+      }}
+    >
+      <label className="field">
+        <span className="field-label">Customer</span>
+        <input className="input" placeholder="Customer name" value={customer} onChange={(e) => setCustomer(e.target.value)} />
       </label>
 
-      {/* Total */}
-      <label className="block">
-        <span className="text-sm font-medium text-[color:var(--muted)]">
-          Total
-        </span>
-        <input
-          type="number"
-          value={String(total)}
-          onChange={(e) => setTotal(Number(e.target.value))}
-          className={cn('input mt-1 w-full', ui.radius.md, ui.shadow.sm)}
-        />
-      </label>
-
-      {/* Status */}
-      <label className="block">
-        <span className="text-sm font-medium text-[color:var(--muted)]">
-          Status
-        </span>
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className={cn('input mt-1 w-48', ui.radius.md, ui.shadow.sm)}
-        >
-          <option>Pending</option>
-          <option>Completed</option>
-          <option>Cancelled</option>
-        </select>
-      </label>
-
-      {/* Date */}
-      <label className="block">
-        <span className="text-sm font-medium text-[color:var(--muted)]">
-          Date
-        </span>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className={cn('input mt-1 w-48', ui.radius.md, ui.shadow.sm)}
-        />
-      </label>
-
-      {/* Actions */}
-      <div className="flex justify-end pt-2">
-        <button
-          onClick={() =>
-            onSubmit({
-              id: initial?.id,
-              customer: customer.trim(),
-              total,
-              status,
-              date,
-            })
-          }
-          className={cn(
-            'px-5 py-2 text-sm font-medium bg-[color:var(--primary)] text-white hover:opacity-90 active:scale-95 transition-all',
-            ui.radius.md,
-            ui.shadow.md
-          )}
-        >
-          Save
-        </button>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <label className="field">
+          <span className="field-label">Total</span>
+          <input className="input" type="number" min={0} step="0.01" value={String(total)} onChange={(e) => setTotal(Number(e.target.value))} />
+        </label>
+        <label className="field">
+          <span className="field-label">Status</span>
+          <select className="input" value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option>Pending</option>
+            <option>Completed</option>
+            <option>Cancelled</option>
+          </select>
+        </label>
       </div>
-    </div>
+
+      <label className="field">
+        <span className="field-label">Date</span>
+        <input className="input sm:max-w-[12rem]" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+      </label>
+
+      <div className="form-actions">
+        <button type="submit" className="btn-primary px-5 py-2 text-sm">Save</button>
+      </div>
+    </form>
   );
 }

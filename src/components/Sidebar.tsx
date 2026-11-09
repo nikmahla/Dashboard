@@ -5,17 +5,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
-  ShoppingBag,
-  Users,
   Package,
+  Warehouse,
+  Users,
   Settings,
   X,
-  ChevronLeft,
-  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
   ListTodo,
   UserCircle,
   UserCog,
-  ClipboardList,
+  Receipt,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Tooltip from '@/components/Tooltip';
@@ -27,13 +27,32 @@ type NavItem = {
   icon: LucideIcon;
 };
 
-const NAV_ITEMS: NavItem[] = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/products', label: 'Products', icon: ShoppingBag },
-  { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
-  { href: '/admin/customers', label: 'Customers', icon: Users },
-  { href: '/admin/users', label: 'Users', icon: UserCog },
-  { href: '/admin/tasks', label: 'Tasks', icon: ListTodo },
+const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
+  { items: [{ href: '/admin', label: 'Dashboard', icon: LayoutDashboard }] },
+  {
+    label: 'Sales',
+    items: [
+      { href: '/admin/orders', label: 'Orders', icon: Receipt },
+      { href: '/admin/customers', label: 'Customers', icon: Users },
+    ],
+  },
+  {
+    label: 'Catalog',
+    items: [
+      { href: '/admin/products', label: 'Products', icon: Package },
+      { href: '/admin/inventory', label: 'Inventory', icon: Warehouse },
+    ],
+  },
+  {
+    label: 'Workspace',
+    items: [
+      { href: '/admin/tasks', label: 'Tasks', icon: ListTodo },
+      { href: '/admin/users', label: 'Users', icon: UserCog },
+    ],
+  },
+];
+
+const ACCOUNT_ITEMS: NavItem[] = [
   { href: '/admin/profile', label: 'Profile', icon: UserCircle },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
@@ -68,6 +87,37 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
       centered && 'justify-center'
     );
 
+  const showLabels = isMobile || !collapsed;
+
+  const renderItem = (item: NavItem) => {
+    const Icon = item.icon;
+    const active = pathname === item.href;
+
+    const link = (
+      <Link
+        href={item.href}
+        onClick={closeMobile}
+        className={linkClass(active, !showLabels)}
+        aria-current={active ? 'page' : undefined}
+      >
+        <Icon size={ui.icon.md} className="shrink-0" aria-hidden />
+        {showLabels && <span>{item.label}</span>}
+      </Link>
+    );
+
+    return (
+      <div key={item.href} className="relative">
+        {!showLabels ? (
+          <Tooltip label={item.label} side="right">
+            {link}
+          </Tooltip>
+        ) : (
+          link
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       {open && isMobile && (
@@ -82,30 +132,15 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
       <aside
         className={cn(
           'z-40 overflow-visible bg-[color:var(--sidebar-bg)] text-[color:var(--sidebar-text)]',
-          'border-r border-[color:var(--glass-border)] shadow-sm',
-          'transition-[transform,width] duration-300 ease-in-out',
+          'border-r border-[color:var(--border-default)]',
+          'transition-[transform,width] duration-200 ease-out',
           isMobile
-            ? 'fixed bottom-0 left-0 top-16 w-64 max-w-[85vw]'
-            : 'md:sticky md:top-16 md:h-[calc(100vh-4rem)]',
+            ? 'fixed bottom-0 left-0 top-14 w-60 max-w-[85vw]'
+            : 'md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:flex md:flex-col',
           isMobile && (open ? 'translate-x-0' : '-translate-x-full'),
-          !isMobile && (collapsed ? 'md:w-20' : 'md:w-64')
+          !isMobile && (collapsed ? 'md:w-[4.5rem]' : 'md:w-60')
         )}
       >
-        <div className="hidden justify-end pb-2 pr-2 pt-4 md:flex">
-          <button
-            type="button"
-            onClick={() => setCollapsed((c) => !c)}
-            className={cn(
-              ui.radius.md,
-              'p-1.5 text-[color:var(--sidebar-text)]/70 transition-colors hover:bg-[var(--sidebar-hover)] hover:text-[color:var(--sidebar-text)]',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]'
-            )}
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          </button>
-        </div>
-
         {isMobile && (
           <div className="flex items-center justify-between border-b border-[color:var(--glass-border)] px-4 py-3 md:hidden">
             <span className="text-sm font-semibold">Menu</span>
@@ -120,37 +155,28 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
           </div>
         )}
 
-        <nav className="space-y-1 px-2 pb-6 pt-3" aria-label="Main navigation">
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const active = pathname === item.href;
-            const showLabel = isMobile || !collapsed;
-
-            const link = (
-              <Link
-                href={item.href}
-                onClick={closeMobile}
-                className={linkClass(active, !showLabel)}
-                aria-current={active ? 'page' : undefined}
-              >
-                <Icon size={ui.icon.md} className="shrink-0" aria-hidden />
-                {showLabel && <span>{item.label}</span>}
-              </Link>
-            );
-
-            return (
-              <div key={item.href} className="relative">
-                {!isMobile && collapsed ? (
-                  <Tooltip label={item.label} side="right">
-                    {link}
-                  </Tooltip>
-                ) : (
-                  link
-                )}
-              </div>
-            );
-          })}
+        <nav className="flex-1 overflow-y-auto px-3 pb-3 pt-2" aria-label="Main navigation">
+          {NAV_GROUPS.map((group, gi) => (
+            <div key={group.label ?? gi} className="space-y-0.5">
+              {group.label && showLabels && <p className="sidebar-group">{group.label}</p>}
+              {group.label && !showLabels && <div className="mx-3 my-3 border-t border-[color:var(--border-default)]" />}
+              {group.items.map((item) => renderItem(item))}
+            </div>
+          ))}
         </nav>
+
+        <div className="space-y-0.5 border-t border-[color:var(--border-default)] px-3 py-3">
+          {ACCOUNT_ITEMS.map((item) => renderItem(item))}
+          <button
+            type="button"
+            onClick={() => setCollapsed((c) => !c)}
+            className={cn('sidebar-item hidden w-full md:flex', !showLabels && 'justify-center')}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? <PanelLeftOpen size={ui.icon.md} aria-hidden /> : <PanelLeftClose size={ui.icon.md} aria-hidden />}
+            {showLabels && <span>Collapse</span>}
+          </button>
+        </div>
       </aside>
     </>
   );
