@@ -9,21 +9,24 @@ export type Order = {
   date: string;
 };
 
-type OrdersResponse = { data: Order[]; total: number };
+type OrdersResponse = { data: Order[]; total: number; facets?: Record<string, number> };
 
-export function useOrders(params: { page: number; pageSize: number; search: string }) {
-  const { page, pageSize, search } = params;
+export type OrderParams = { page: number; pageSize: number; search: string; status?: string };
+
+export function useOrders(params: OrderParams) {
+  const { page, pageSize, search, status = "" } = params;
 
   return useQuery<OrdersResponse>({
-    queryKey: ["orders", page, pageSize, search],
+    queryKey: ["orders", page, pageSize, search, status],
+    placeholderData: (prev) => prev,
     queryFn: () =>
       http<OrdersResponse>(
-        `/api/orders?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
+        `/api/orders?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`
       ),
   });
 }
 
-export function useCreateOrder(params: { page: number; pageSize: number; search: string }) {
+export function useCreateOrder(params: OrderParams) {
   const qc = useQueryClient();
 
   return useMutation({
@@ -31,7 +34,7 @@ export function useCreateOrder(params: { page: number; pageSize: number; search:
       http<Order>("/api/orders", { method: "POST", body: JSON.stringify(payload) }),
 
    onMutate: async (patch) => {
-  const key = ["orders", params.page, params.pageSize, params.search] as const;
+  const key = ["orders", params.page, params.pageSize, params.search, params.status ?? ""] as const;
 
   await qc.cancelQueries({ queryKey: key });
 
@@ -71,11 +74,12 @@ export function useCreateOrder(params: { page: number; pageSize: number; search:
 
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] }); // keep the dashboard numbers in step
     },
   });
 }
 
-export function useUpdateOrder(params: { page: number; pageSize: number; search: string }) {
+export function useUpdateOrder(params: OrderParams) {
   const qc = useQueryClient();
 
   return useMutation({
@@ -83,7 +87,7 @@ export function useUpdateOrder(params: { page: number; pageSize: number; search:
       http<Order>("/api/orders", { method: "PUT", body: JSON.stringify(payload) }),
 
     onMutate: async (patch) => {
-      const key = ["orders", params.page, params.pageSize, params.search] as const;
+      const key = ["orders", params.page, params.pageSize, params.search, params.status ?? ""] as const;
       const prev = qc.getQueryData<OrdersResponse>(key);
 
       await qc.cancelQueries({ queryKey: key });
@@ -115,12 +119,13 @@ export function useUpdateOrder(params: { page: number; pageSize: number; search:
 
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] }); // keep the dashboard numbers in step
     },
   });
 }
 
 // ✅ optimistic delete (this is the one you said you don’t have)
-export function useDeleteOrder(params: { page: number; pageSize: number; search: string }) {
+export function useDeleteOrder(params: OrderParams) {
   const qc = useQueryClient();
 
   return useMutation({
@@ -128,7 +133,7 @@ export function useDeleteOrder(params: { page: number; pageSize: number; search:
       http<{ success: true }>(`/api/orders?id=${id}`, { method: "DELETE" }),
 
     onMutate: async (id) => {
-        const key = ["orders", params.page, params.pageSize, params.search] as const;
+        const key = ["orders", params.page, params.pageSize, params.search, params.status ?? ""] as const;
       const prev = qc.getQueryData<OrdersResponse>(key);
 
       await qc.cancelQueries({ queryKey: key });
@@ -149,6 +154,7 @@ export function useDeleteOrder(params: { page: number; pageSize: number; search:
 
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] }); // keep the dashboard numbers in step
     },
   });
 }

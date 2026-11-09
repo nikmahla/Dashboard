@@ -1,19 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  Menu,
-  LogOut,
-  Sun,
-  Moon,
-  Bell,
-  Settings,
-  HelpCircle,
-  Keyboard,
-  Shield,
-  User,
-} from 'lucide-react';
+import { Menu, LogOut, Sun, Moon, Settings, User, Boxes, Palette } from 'lucide-react';
 import IconButton from '@/components/ui/IconButton';
 import { DropdownButton, DropdownLink } from '@/components/ui/DropdownItem';
 import { useSettings } from '@/context/SettingsContext';
@@ -25,15 +15,13 @@ type TopbarProps = {
 };
 
 export default function Topbar({ onToggleSidebar }: TopbarProps) {
-  const { user: settingsUser, theme, toggleTheme } = useSettings();
+  const { user: settingsUser, theme, toggleTheme, accent, toggleAccent } = useSettings();
   const { user: authUser, logout } = useAuth();
   const displayName = authUser?.name ?? settingsUser?.name ?? 'User';
   const displayEmail = authUser?.email ?? settingsUser?.email ?? '';
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  const notificationCount = 3;
 
   useEffect(() => {
     const closeOnOutsideClick = (e: MouseEvent) => {
@@ -57,8 +45,7 @@ export default function Topbar({ onToggleSidebar }: TopbarProps) {
   return (
     <header
       className={cn(
-        'fixed inset-x-0 top-0 z-50 flex h-16 items-center glass border-b backdrop-blur-xl',
-        'supports-[backdrop-filter]:bg-[color:var(--background)/0.6]'
+        'fixed inset-x-0 top-0 z-50 flex h-14 items-center border-b bg-[color:var(--card-bg)]'
       )}
       style={{ borderColor: 'var(--glass-border)' }}
     >
@@ -73,23 +60,26 @@ export default function Topbar({ onToggleSidebar }: TopbarProps) {
             <Menu size={ui.icon.md} aria-hidden />
           </IconButton>
 
-          <div className="min-w-0">
-            <p className="truncate text-lg font-semibold tracking-tight text-[color:var(--foreground)]">
-              Admin Panel
-            </p>
-            <p className="hidden truncate text-xs text-[color:var(--muted)] sm:block">
-              Store management
-            </p>
-          </div>
+          <Link href="/admin" className="flex min-w-0 items-center gap-2.5" aria-label="Stockroom home">
+            <span
+              className={cn('flex h-8 w-8 items-center justify-center bg-[color:var(--foreground)] text-[color:var(--card-bg)]', ui.radius.md)}
+              aria-hidden
+            >
+              <Boxes size={17} strokeWidth={2} />
+            </span>
+            <span className="truncate text-base font-semibold tracking-tight text-[color:var(--foreground)]">
+              Stockroom
+            </span>
+          </Link>
         </div>
 
         <div className="relative flex shrink-0 items-center gap-2 sm:gap-3" ref={menuRef}>
           <IconButton
-            aria-label={`Notifications, ${notificationCount} unread`}
-            onClick={closeMenu}
-            badge={notificationCount}
+            onClick={toggleAccent}
+            aria-label={accent === 'amber' ? 'Switch to blue accent' : 'Switch to amber accent'}
+            title={accent === 'amber' ? 'Accent: amber' : 'Accent: blue'}
           >
-            <Bell size={ui.icon.md} aria-hidden />
+            <Palette size={ui.icon.md} aria-hidden />
           </IconButton>
 
           <IconButton
@@ -107,8 +97,8 @@ export default function Topbar({ onToggleSidebar }: TopbarProps) {
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
             className={cn(
-              'flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1 transition-colors',
-              'hover:bg-[var(--primary-soft)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]'
+              'flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 transition-colors',
+              'hover:bg-[var(--surface-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]'
             )}
             aria-label="Open account menu"
             aria-expanded={menuOpen}
@@ -121,12 +111,12 @@ export default function Topbar({ onToggleSidebar }: TopbarProps) {
               <img
                 src={settingsUser.avatar}
                 alt=""
-                className={cn('h-9 w-9 object-cover shadow-sm', ui.radius.md)}
+                className={cn('h-9 w-9 object-cover', ui.radius.md)}
               />
             ) : (
               <div
                 className={cn(
-                  'flex h-9 w-9 items-center justify-center bg-[color:var(--primary)] text-sm font-semibold text-white shadow-sm',
+                  'flex h-9 w-9 items-center justify-center bg-[color:var(--primary)] text-sm font-semibold text-[color:var(--primary-contrast)]',
                   ui.radius.md
                 )}
                 aria-hidden
@@ -141,8 +131,8 @@ export default function Topbar({ onToggleSidebar }: TopbarProps) {
             className={cn(
               'absolute right-0 top-[calc(100%+0.5rem)] w-56 origin-top-right overflow-hidden',
               ui.radius.md,
-              'border border-[color:var(--glass-border)] bg-[color:var(--card-bg)] shadow-xl backdrop-blur-xl',
-              'transition-all duration-200',
+              'border border-[color:var(--glass-border)] bg-[color:var(--card-bg)] shadow-[var(--shadow-lg)]',
+              'transition-[opacity,transform] duration-150',
               menuOpen
                 ? 'pointer-events-auto scale-100 opacity-100'
                 : 'pointer-events-none scale-95 opacity-0'
@@ -155,6 +145,9 @@ export default function Topbar({ onToggleSidebar }: TopbarProps) {
               <p className="truncate text-xs text-[color:var(--muted)]">
                 {displayEmail || 'user@email.com'}
               </p>
+              {authUser?.role && (
+                <span className="badge badge-neutral mt-2">{authUser.role}</span>
+              )}
             </div>
 
             <DropdownLink
@@ -163,10 +156,12 @@ export default function Topbar({ onToggleSidebar }: TopbarProps) {
               label="My profile"
               onClick={closeMenu}
             />
-            <DropdownButton icon={Settings} label="Account settings" onClick={closeMenu} />
-            <DropdownButton icon={Shield} label="Security" onClick={closeMenu} />
-            <DropdownButton icon={Keyboard} label="Keyboard shortcuts" onClick={closeMenu} />
-            <DropdownButton icon={HelpCircle} label="Help & support" onClick={closeMenu} />
+            <DropdownLink
+              href="/admin/settings"
+              icon={Settings}
+              label="Settings"
+              onClick={closeMenu}
+            />
 
             <div className="my-1 border-t border-[color:var(--glass-border)]" role="separator" />
 

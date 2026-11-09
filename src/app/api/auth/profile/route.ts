@@ -1,31 +1,23 @@
 import { NextResponse } from "next/server";
 import { signToken, verifyToken } from "@/lib/jwt";
 
-function getToken(req: Request) {
-  return req.headers.get("cookie")?.match(/token=([^;]+)/)?.[1];
-}
+import { getCookie } from "@/lib/auth-cookie";
+import { parseBody } from "@/lib/api-utils";
+import { profileUpdate } from "@/lib/validation";
 
 export async function PATCH(req: Request) {
-  const token = getToken(req);
+  const token = getCookie(req, "token");
   if (!token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const payload = await verifyToken(token);
-    const body = await req.json();
+    const body = await parseBody(req, profileUpdate);
+    if (!body.ok) return body.res;
 
-    const name = String(body.name ?? payload.name ?? "").trim();
-    const email = String(body.email ?? payload.email ?? "")
-      .trim()
-      .toLowerCase();
-
-    if (!name) {
-      return NextResponse.json({ message: "Name is required" }, { status: 400 });
-    }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return NextResponse.json({ message: "Valid email is required" }, { status: 400 });
-    }
+    const name = body.data.name ?? String(payload.name ?? "");
+    const email = body.data.email ?? String(payload.email ?? "");
 
     const sub = Number(payload.sub);
     const role = String(payload.role ?? "User");

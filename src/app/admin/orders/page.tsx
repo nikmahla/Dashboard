@@ -1,5 +1,8 @@
 "use client";
 
+import StatusBadge from "@/components/ui/StatusBadge";
+import { money, shortDate } from "@/lib/format";
+import { useAuth } from "@/context/AuthContext";
 import { useMemo, useState } from "react";
 import DataTable from "@/components/DataTable";
 import Modal from "@/components/Modal";
@@ -10,11 +13,15 @@ import { useToast } from "@/components/ToastContext";
 import * as useOrders from "@/hooks/useOrders";
 import { useApiError } from "@/hooks/useApiError";
 import { ui } from "@/lib/ui";
+import Tabs from "@/components/ui/Tabs";
+
+const STATUSES = ["Pending", "Completed", "Cancelled"] as const;
 
 export default function OrdersPage() {
   const toast = useToast();
   const onApiError = useApiError();
 
+  const { canWrite } = useAuth();
   const [selected, setSelected] = useState<useOrders.Order | null>(null);
   const [editing, setEditing] = useState<useOrders.Order | null>(null);
   const [adding, setAdding] = useState(false);
@@ -24,14 +31,20 @@ export default function OrdersPage() {
 
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 350);
+  const [status, setStatus] = useState("");
 
-  const ordersQuery = useOrders.useOrders({ page, pageSize, search: debouncedQuery });
-  const createOrder = useOrders.useCreateOrder({ page, pageSize, search: debouncedQuery });
-  const updateOrder = useOrders.useUpdateOrder({ page, pageSize, search: debouncedQuery });
-  const deleteOrder = useOrders.useDeleteOrder({ page, pageSize, search: debouncedQuery });
+  const ordersQuery = useOrders.useOrders({ page, pageSize, search: debouncedQuery, status });
+  const createOrder = useOrders.useCreateOrder({ page, pageSize, search: debouncedQuery, status });
+  const updateOrder = useOrders.useUpdateOrder({ page, pageSize, search: debouncedQuery, status });
+  const deleteOrder = useOrders.useDeleteOrder({ page, pageSize, search: debouncedQuery, status });
 
   const orders: useOrders.Order[] = ordersQuery.data?.data ?? [];
   const total = ordersQuery.data?.total ?? 0;
+  const facets = ordersQuery.data?.facets;
+  const tabs = [
+    { value: "", label: "All", count: facets ? Object.values(facets).reduce((a, b) => a + b, 0) : undefined },
+    ...STATUSES.map((s) => ({ value: s, label: s, count: facets ? (facets[s] ?? 0) : undefined })),
+  ];
 
   const searchLoading = useMemo(() => {
     const typing = query !== debouncedQuery;
@@ -54,6 +67,16 @@ export default function OrdersPage() {
         )}
       </header>
 
+      <Tabs
+        label="Filter orders by status"
+        items={tabs}
+        value={status}
+        onChange={(v) => {
+          setStatus(v);
+          setPage(1);
+        }}
+      />
+
       <DataTable
         data={orders}
         searchableKey="customer"
@@ -74,13 +97,13 @@ export default function OrdersPage() {
         }}
         columns={[
           { key: "customer", label: "Customer" },
-          { key: "date", label: "Date" },
-          { key: "status", label: "Status" },
+          { key: "date", label: "Date", render: (r) => shortDate((r as useOrders.Order).date) },
+          { key: "status", label: "Status", render: (r) => <StatusBadge status={(r as useOrders.Order).status} /> },
           {
             key: "total",
             label: "Total",
             numeric: true,
-            render: (r) => `$${(r as useOrders.Order).total}`,
+            render: (r) => money((r as useOrders.Order).total),
           },
         ]}
         entityLabel="Order"
@@ -91,8 +114,8 @@ export default function OrdersPage() {
           return `${o.customer} · ${o.date}`;
         }}
         onView={(row) => setSelected(row)}
-        onEdit={(row) => setEditing(row)}
-        onDelete={async (row) => {
+        onEdit={canWrite ? (row) => setEditing(row) : undefined}
+        onDelete={!canWrite ? undefined : async (row) => {
           try {
             await deleteOrder.mutateAsync(row.id);
             toast.notify({ type: "success", message: "Order deleted" });
@@ -100,7 +123,7 @@ export default function OrdersPage() {
             onApiError(err, "Could not delete order");
           }
         }}
-        onCreate={() => setAdding(true)}
+        onCreate={canWrite ? () => setAdding(true) : undefined}
       />
 
       <Modal
@@ -152,7 +175,7 @@ export default function OrdersPage() {
         icon={<Package size={18} />}
       >
         {selected && (
-          <dl className="space-y-4">
+          <dl className="detail-list">
             <Detail label="Customer" value={selected.customer} />
             <Detail label="Date" value={selected.date} />
             <Detail label="Status" value={selected.status} />
@@ -166,9 +189,9 @@ export default function OrdersPage() {
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <dt className={ui.typography.caption}>{label}</dt>
-      <dd className="mt-0.5 text-sm font-medium text-[color:var(--foreground)]">{value}</dd>
+    <div className="detail-row">
+      <dt>{label}</dt>
+      <dd>{value}</dd>
     </div>
   );
 }

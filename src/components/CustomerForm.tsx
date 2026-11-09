@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { ui, cn } from '@/lib/ui';
 
 export default function CustomerForm({
   initial,
@@ -15,81 +14,32 @@ export default function CustomerForm({
   const [orders, setOrders] = useState(initial?.orders ?? 0);
 
   return (
-    <div className="space-y-5">
-
-      {/* Name */}
-      <label className="block">
-        <span className="text-sm font-medium text-[color:var(--muted)]">
-          Name
-        </span>
-        <input
-        placeholder='Enter Name'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className={cn(
-              'mt-1 w-full px-3 py-2 bg-[color:var(--card-bg)] border border-[color:var(--glass-border)] text-[color:var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent transition-all',
-              ui.radius.md,
-              ui.shadow.sm
-            )}
-        />
+    <form
+      className="form-stack"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit({ id: initial?.id, name: name.trim(), email: email.trim(), orders });
+      }}
+    >
+      <label className="field">
+        <span className="field-label">Name</span>
+        <input className="input" placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} />
       </label>
 
-      {/* Email */}
-      <label className="block">
-        <span className="text-sm font-medium text-[color:var(--muted)]">
-          Email
-        </span>
-        <input
-placeholder='Email'
-          type='email'
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className={cn(
-              'mt-1 w-full px-3 py-2 bg-[color:var(--card-bg)] border border-[color:var(--glass-border)] text-[color:var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent transition-all',
-              ui.radius.md,
-              ui.shadow.sm
-            )}
-        />
+      <label className="field">
+        <span className="field-label">Email</span>
+        <input className="input" type="email" placeholder="name@company.com" value={email} onChange={(e) => setEmail(e.target.value)} />
       </label>
 
-      {/* Orders */}
-      <label className="block">
-        <span className="text-sm font-medium text-[color:var(--muted)]">
-          Orders
-        </span>
-        <input
-        placeholder='Add Number'
-          type="number"
-          value={String(orders)}
-          onChange={(e) => setOrders(Number(e.target.value))}
-          className={cn(
-              'mt-1 w-32 px-3 py-2 bg-[color:var(--card-bg)] border border-[color:var(--glass-border)] text-[color:var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent transition-all',
-              ui.radius.md,
-              ui.shadow.sm
-            )}
-        />
+      <label className="field">
+        <span className="field-label">Orders</span>
+        <input className="input sm:max-w-[10rem]" type="number" min={0} placeholder="0" value={String(orders)} onChange={(e) => setOrders(Number(e.target.value))} />
+        <span className="field-hint">Total orders placed by this customer</span>
       </label>
 
-      {/* Actions */}
-      <div className="flex justify-end pt-2">
-        <button
-          onClick={() =>
-            onSubmit({
-              id: initial?.id,
-              name: name.trim(),
-              email: email.trim(),
-              orders,
-            })
-          }
-          className={cn(
-            'px-5 py-2 text-sm font-medium bg-[color:var(--primary)] text-white hover:opacity-90 active:scale-95 transition-all',
-            ui.radius.md,
-            ui.shadow.md
-          )}
-        >
-          Save
-        </button>
+      <div className="form-actions">
+        <button type="submit" className="btn-primary px-5 py-2 text-sm">Save</button>
       </div>
-    </div>
+    </form>
   );
 }

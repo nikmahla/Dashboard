@@ -7,7 +7,6 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Copy,
   Check,
   Loader2,
   LayoutDashboard,
@@ -16,10 +15,11 @@ import { useAuth } from '@/context/AuthContext';
 import { ui, cn } from '@/lib/ui';
 import { useToast } from '@/components/ToastContext';
 
-export const DEMO_CREDENTIALS = {
-  email: 'admin@test.com',
-  password: '1234',
-} as const;
+// Demo accounts for visitors (the same ones seeded in src/lib/data/auth-users.ts).
+export const DEMO_ACCOUNTS = [
+  { label: 'Viewer', hint: 'read-only', email: 'viewer@test.com', password: '1234' },
+  { label: 'Admin', hint: 'full access', email: 'admin@test.com', password: '1234' },
+] as const;
 
 type FieldErrors = {
   email?: string;
@@ -52,7 +52,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
 
   const emailId = useId();
@@ -60,23 +60,16 @@ export default function LoginForm() {
   const emailErrorId = useId();
   const passwordErrorId = useId();
 
-  const handleCopyCredentials = useCallback(async () => {
-    const text = `Email: ${DEMO_CREDENTIALS.email}\nPassword: ${DEMO_CREDENTIALS.password}`;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      setEmail(DEMO_CREDENTIALS.email);
-      setPassword(DEMO_CREDENTIALS.password);
+  const fillDemo = useCallback(
+    (account: (typeof DEMO_ACCOUNTS)[number]) => {
+      setEmail(account.email);
+      setPassword(account.password);
       setErrors({});
-      setCopied(true);
-      toast.notify({ type: 'success', message: 'Demo credentials copied' });
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setEmail(DEMO_CREDENTIALS.email);
-      setPassword(DEMO_CREDENTIALS.password);
-      toast.notify({ type: 'info', message: 'Credentials filled in the form' });
-    }
-  }, [toast]);
+      setCopied(account.label);
+      setTimeout(() => setCopied(null), 1500);
+    },
+    []
+  );
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -135,37 +128,31 @@ export default function LoginForm() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleCopyCredentials}
-          className="mb-6 flex w-full items-center justify-between gap-3 rounded-xl border border-dashed border-[color:var(--glass-border)] bg-[var(--primary-soft)] px-4 py-3 text-left transition-colors hover:border-[color:var(--primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)] focus-visible:ring-offset-2"
-          aria-label="Copy demo credentials to clipboard and fill the form"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--primary)]">
-              Demo access
-            </p>
-            <p className="mt-0.5 truncate text-sm text-[color:var(--foreground)]">
-              {DEMO_CREDENTIALS.email}
-            </p>
-            <p className="text-xs text-[color:var(--muted)]">
-              Password: {DEMO_CREDENTIALS.password}
-            </p>
+        <div className="mb-6 rounded-xl border border-dashed border-[color:var(--glass-border)] bg-[var(--primary-soft)] p-3">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[color:var(--primary)]">
+            Demo access · click to fill
+          </p>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {DEMO_ACCOUNTS.map((a) => (
+              <button
+                key={a.label}
+                type="button"
+                onClick={() => fillDemo(a)}
+                className="flex items-center justify-between gap-2 rounded-lg bg-[var(--card-bg)] px-3 py-2 text-left transition-colors hover:ring-1 hover:ring-[color:var(--primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]"
+                aria-label={`Fill the form with the ${a.label} demo account (${a.hint})`}
+              >
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-[color:var(--foreground)]">
+                    {a.label} <span className="text-xs font-normal text-[color:var(--muted)]">· {a.hint}</span>
+                  </span>
+                  <span className="block truncate text-xs text-[color:var(--muted)]">{a.email}</span>
+                  <span className="block text-xs text-[color:var(--muted)]">Password: {a.password}</span>
+                </span>
+                {copied === a.label && <Check size={14} className="shrink-0 text-[color:var(--success)]" aria-hidden />}
+              </button>
+            ))}
           </div>
-            <span className={cn('flex shrink-0 items-center gap-1.5 bg-[var(--card-bg)] px-2.5 py-1.5 text-xs font-medium text-[color:var(--foreground)]', ui.radius.sm, ui.shadow.sm)}>
-            {copied ? (
-              <>
-                <Check size={14} className="text-[color:var(--success)]" aria-hidden />
-                Copied
-              </>
-            ) : (
-              <>
-                <Copy size={14} aria-hidden />
-                Copy
-              </>
-            )}
-          </span>
-        </button>
+        </div>
 
         <form onSubmit={onSubmit} className="space-y-5" noValidate>
           <div>
@@ -275,7 +262,7 @@ export default function LoginForm() {
       </div>
 
       <p className="mt-6 text-center text-xs text-[color:var(--muted)]">
-        Protected admin area · Demo credentials above
+        Protected admin area · Demo accounts above
       </p>
     </div>
   );

@@ -49,16 +49,10 @@ export default function Modal({
 
       <div className="relative flex h-full w-full items-start justify-center p-4 sm:items-center sm:p-6">
         <div
-          className={cn(
-            'relative w-full animate-scaleIn overflow-hidden bg-[color:var(--card-bg)]',
-            ui.radius.lg,
-            'border border-[color:var(--border-subtle)]',
-            'shadow-[var(--shadow-xl)] ring-1 ring-black/5 dark:ring-white/10',
-            sizeClass[size]
-          )}
+          className={cn('modal-panel relative w-full animate-scaleIn overflow-hidden', sizeClass[size])}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="border-b border-[color:var(--border-muted)] bg-[color:var(--card-bg)] px-6 py-5 sm:px-7">
+          <div className="modal-head px-5 py-4 sm:px-6">
             <div className="flex items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-3">
                 {icon && (
@@ -102,14 +96,12 @@ export default function Modal({
             </div>
           </div>
 
-          <div className="max-h-[min(70vh,520px)] overflow-y-auto px-6 py-6 text-sm text-[color:var(--foreground)] sm:px-7">
-            <div className="space-y-5 rounded-3xl border border-[color:var(--border-muted)] bg-[color:var(--background)] p-5 shadow-[var(--shadow-xs)]">
-              {children}
-            </div>
+          <div className="max-h-[min(70vh,560px)] overflow-y-auto px-5 py-5 text-sm text-[color:var(--foreground)] sm:px-6">
+            {children}
           </div>
 
           {footer && (
-            <div className="border-t border-[color:var(--border-muted)] bg-[color:var(--card-bg)] px-6 py-4 sm:px-7">
+            <div className="modal-foot px-5 py-3 sm:px-6">
               {footer}
             </div>
           )}

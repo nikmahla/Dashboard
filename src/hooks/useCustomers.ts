@@ -34,7 +34,7 @@ export function useCreateCustomer(p: Params) {
   return useMutation({
     mutationFn: (vals: Omit<Customer, "id">) =>
       http<Customer>("/api/customers", { method: "POST", body: JSON.stringify(vals) }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["customers", page, pageSize, search] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["customers", page, pageSize, search] }); qc.invalidateQueries({ queryKey: ["dashboard"] }); },
   });
 }
 
@@ -45,7 +45,7 @@ export function useUpdateCustomer(p: Params) {
   return useMutation({
     mutationFn: (vals: Customer) =>
       http<Customer>("/api/customers", { method: "PUT", body: JSON.stringify(vals) }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["customers", page, pageSize, search] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["customers", page, pageSize, search] }); qc.invalidateQueries({ queryKey: ["dashboard"] }); },
   });
 }
 
@@ -56,6 +56,6 @@ export function useDeleteCustomer(p: Params) {
   return useMutation({
     mutationFn: (id: number) =>
       http<{ success: true }>(`/api/customers?id=${id}`, { method: "DELETE" }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["customers", page, pageSize, search] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["customers", page, pageSize, search] }); qc.invalidateQueries({ queryKey: ["dashboard"] }); },
   });
 }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight, LayoutDashboard } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { getBreadcrumbs } from '@/lib/breadcrumbs';
 import { ui, cn } from '@/lib/ui';
 
@@ -10,22 +10,13 @@ export default function Breadcrumbs() {
   const pathname = usePathname();
   const items = getBreadcrumbs(pathname);
 
-  if (items.length === 0) return null;
+  // Nothing to navigate back to on the dashboard itself.
+  if (items.length <= 1) return null;
 
   return (
-    <nav aria-label="Breadcrumb" className="mb-5 sm:mb-6">
-      <ol
-        className={cn(
-          'flex flex-wrap items-center gap-1.5 sm:gap-2',
-          ui.radius.md,
-          'border border-[color:var(--breadcrumb-border)] bg-[color:var(--breadcrumb-bg)]',
-          'px-3 py-2.5 text-sm',
-          ui.shadow.sm
-        )}
-      >
+    <nav aria-label="Breadcrumb" className="mb-3">
+      <ol className="flex flex-wrap items-center gap-1.5 text-sm sm:gap-2">
         {items.map((item, index) => {
-          const isFirst = index === 0;
-
           return (
             <li key={item.href} className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               {index > 0 && (
@@ -38,12 +29,9 @@ export default function Breadcrumbs() {
 
               {item.isCurrent ? (
                 <span
-                  className="flex items-center gap-1.5 truncate font-medium text-[color:var(--primary)]"
+                  className="flex items-center gap-1.5 truncate font-medium text-[color:var(--foreground)]"
                   aria-current="page"
                 >
-                  {isFirst && (
-                    <LayoutDashboard size={14} className="shrink-0" aria-hidden />
-                  )}
                   {item.label}
                 </span>
               ) : (
@@ -56,9 +44,6 @@ export default function Breadcrumbs() {
                     ui.radius.sm
                   )}
                 >
-                  {isFirst && (
-                    <LayoutDashboard size={14} className="shrink-0" aria-hidden />
-                  )}
                   <span className="truncate">{item.label}</span>
                 </Link>
               )}

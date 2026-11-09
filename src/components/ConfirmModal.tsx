@@ -47,15 +47,10 @@ export default function ConfirmModal({
 
       <div className="relative flex h-full w-full items-start justify-center p-4 sm:items-center sm:p-6">
         <div
-          className={cn(
-            'relative w-full max-w-md animate-scaleIn overflow-hidden',
-            ui.radius.lg,
-            'border border-[color:var(--border-subtle)] bg-[color:var(--card-bg)]',
-            'shadow-[var(--shadow-xl)]'
-          )}
+          className="modal-panel relative w-full max-w-md animate-scaleIn overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="border-b border-[color:var(--border-muted)] px-5 py-4">
+          <div className="modal-head px-5 py-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
                 <span
@@ -90,10 +85,6 @@ export default function ConfirmModal({
                 <X size={18} aria-hidden />
               </button>
             </div>
-            <div
-              className="mt-4 h-px w-full bg-gradient-to-r from-[color:var(--danger)]/35 via-[color:var(--border-muted)] to-transparent"
-              aria-hidden
-            />
           </div>
 
           {(itemName || details) && (
@@ -101,7 +92,7 @@ export default function ConfirmModal({
               <div
                 className={cn(
                   ui.radius.md,
-                  'border border-[color:var(--border-muted)] bg-[var(--primary-soft)] p-3 shadow-[var(--shadow-xs)]'
+                  'border border-[color:var(--border-default)] bg-[color:var(--background)] p-3'
                 )}
               >
                 {itemName && (
@@ -120,16 +111,11 @@ export default function ConfirmModal({
             </div>
           )}
 
-          <div className="flex justify-end gap-2 border-t border-[color:var(--border-muted)] px-5 py-4 mt-4">
+          <div className="modal-foot mt-5 flex justify-end gap-2 px-5 py-3">
             <button
               type="button"
               onClick={onCancel}
-              className={cn(
-                'px-4 py-2 text-sm font-medium text-[color:var(--foreground)] transition-colors',
-                ui.radius.md,
-                'border border-[color:var(--border-muted)] bg-[color:var(--card-bg)]',
-                'hover:bg-[var(--primary-soft)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]'
-              )}
+              className="btn-secondary"
             >
               Cancel
             </button>

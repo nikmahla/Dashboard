@@ -121,3 +121,11 @@ Contributions are welcome. If you want to improve the dashboard, please:
 2. Create a feature branch.
 3. Open a pull request with a clear summary of your changes.
 
+
+## API security & structure
+
+- **Validation:** every write endpoint validates input with Zod (`src/lib/validation.ts`) → `400` with field errors.
+- **Auth & roles:** `requireAuth(req, { roles })` → `401` not logged in, `403` wrong role. Viewer = read-only, Editor = read/write, Admin = also manages users.
+- **Passwords:** demo accounts use bcrypt hashes (`src/lib/data/auth-users.ts`).
+- **Data layer:** routes talk to a `Repo<T>` interface (`src/lib/data/`). Today it is in-memory; it can be swapped for PostgreSQL + Prisma without touching the routes.
+- **Tests:** `npm test` includes real-token tests for 401/403/400 (`src/app/api/__tests__`).

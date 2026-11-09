@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
         <div className={ui.layout.content}>
           <Topbar onToggleSidebar={() => setSidebarOpen((v) => !v)} />
-          <main className="flex-1 px-4 pb-6 pt-20 sm:px-6 md:pb-8">
+          <main className="flex-1 px-4 pb-6 pt-[4.5rem] sm:px-6 md:pb-8">
             <div className={ui.layout.main}>
               <Breadcrumbs />
               {children}
